@@ -1,4 +1,4 @@
-import java.awt.geom.Path2D;
+ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -11,6 +11,11 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
+
+import base.Command;
+
+import commands.TurnCommand;
+import commands.MoveStraightCommand;
 
 public class Export {
 	
@@ -63,7 +68,7 @@ public class Export {
 				}
 			}
 			
-			toExport.add(new TurnCommand(-dAngle, .5, null));
+			toExport.add(new TurnCommand(dAngle, .5, null));
 
 			double distance = Math.sqrt(dX*dX+dY*dY) * inchPerPixel;
 			toExport.add(new MoveStraightCommand(distance, .5, null));
@@ -80,11 +85,11 @@ public class Export {
 	
 	public static void export(ArrayList<Command> commands) {
 		try {
-			File file = new File("temp.autr");
+			File file = new File("auton.autr");
 			ObjectOutputStream oos = new ObjectOutputStream(
 									 new BufferedOutputStream(
 									 new FileOutputStream(file)));
-			oos.writeInt(0);
+			oos.writeInt(1);
 			oos.writeInt(0);
 			oos.writeObject(commands);
 			oos.close();
@@ -94,8 +99,9 @@ public class Export {
 
 			URL url = new URL("ftp://anonymous@roborio-" + 
 					JOptionPane.showInputDialog("Enter Team Number")
-					+ "-frc.local/home/lvuser");
+					+ "-frc.local/home/lvuser/auton.autr");
 			URLConnection conn = url.openConnection();
+			
 			
 			conn.getOutputStream().write(buffer);
 			conn.getOutputStream().close();

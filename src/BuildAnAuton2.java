@@ -20,6 +20,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -59,6 +60,10 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 	
 	double inchPerPixel = 0;
 	JScrollPane scrollPane = new JScrollPane();
+	
+	public boolean[] backwards = new boolean[6];
+	boolean toggleBackwards = false;
+	
 	JComponent p = new JComponent() {
 		public void paintComponent(Graphics g) {
 			Graphics2D g2 = (Graphics2D) g;
@@ -307,6 +312,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 					path.lineTo(pX, mouseY);
 
 				}
+				backwards = Arrays.copyOf(backwards, backwards.length+1);
 			}
 			else {					
 				path.lineTo(p.getMousePosition().x, p.getMousePosition().y);
@@ -323,6 +329,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 			pi.currentSegment(coords);
 			temp.moveTo(coords[0], coords[1]);
 			pi.next();
+			backwards = Arrays.copyOf(backwards, backwards.length-1);
+			
 			int i = 1;
 			for(; !pi.isDone(); pi.next()) {
 				pi.currentSegment(coords);
@@ -377,17 +385,25 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 				b.setEnabled(true);
 			}
 			tool = SelectedTool.NONE;
+			p.repaint();
 		}
 		if(e.getKeyCode() == KeyEvent.VK_SHIFT) {
 			if(tool == SelectedTool.ADD) 
 				locked = true;
 		}
+		if(e.getKeyCode() == KeyEvent.VK_B) {
+			if(tool == SelectedTool.ADD) 
+				toggleBackwards = true;
+		}
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		if(e.getKeyCode() == KeyEvent.VK_SHIFT) {
+		if(e .getKeyCode() == KeyEvent.VK_SHIFT) {
 			locked = false;
+		}
+		if(e.getKeyCode() == KeyEvent.VK_B) {
+			toggleBackwards = true;
 		}
 		
 	}
