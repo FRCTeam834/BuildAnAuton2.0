@@ -12,15 +12,15 @@ import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
-import base.Command;
+import visualrobot.Command;
 
-import commands.TurnCommand;
-import commands.MoveStraightCommand;
+import visualrobot.TurnCommand;
+import visualrobot.MoveStraightCommand;
 
 public class Export {
 	
 	
-	public static ArrayList<Command> convertToCommands(Path2D path, double initialAngle, double inchPerPixel) {
+	public static ArrayList<Command> convertToCommands(Path2D path, double initialAngle, double inchPerPixel, boolean[] backwards) {
 		ArrayList<Command> toExport = new ArrayList<Command>();
 		PathIterator pi = path.getPathIterator(null);
 		double[] coords = new double[6];
@@ -68,10 +68,10 @@ public class Export {
 				}
 			}
 			
-			toExport.add(new TurnCommand(dAngle, .5, null));
+			toExport.add(new TurnCommand(dAngle, .3, null));
 
 			double distance = Math.sqrt(dX*dX+dY*dY) * inchPerPixel;
-			toExport.add(new MoveStraightCommand(distance, .5, null));
+			toExport.add(new MoveStraightCommand(distance, .3, null));
 			
 			System.out.println(dAngle+ " degrees, " + distance + " inches.");
 			lastX = currX;
@@ -107,7 +107,9 @@ public class Export {
 			conn.getOutputStream().close();
 			inputStream.close();
 			
-			
+			file.delete();
+			JOptionPane.showMessageDialog(null, "Exported");
+
 			
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(null, "Failed to Export");

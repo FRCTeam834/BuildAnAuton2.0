@@ -61,7 +61,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 	double inchPerPixel = 0;
 	JScrollPane scrollPane = new JScrollPane();
 	
-	public boolean[] backwards = new boolean[6];
+	public boolean[] backwards = new boolean[0];
 	boolean toggleBackwards = false;
 	
 	JComponent p = new JComponent() {
@@ -103,6 +103,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 			
 			double minDistance = 20;
 			Point selected = new Point(0,0);
+			
 
 			
 			for(; !pi.isDone() && !done; pi.next()) {
@@ -127,11 +128,17 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 					g2.fill(new Ellipse2D.Double(coords[0]-5, coords[1]-5, 10, 10));
 
 				}
+				
 				for(int j = 0; j < type * 2; j+=2) {
-					g2.setColor(Color.BLUE);
+					if(backwards[i-1] ) 
+						g2.setColor(Color.RED);
+					else
+						g2.setColor(Color.BLUE);
+
 
 					g2.fill(new Ellipse2D.Double(coords[j]-5, coords[j+1]-5, 10, 10));
 				}
+				
 				
 				i++;
 			}
@@ -312,11 +319,14 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 					path.lineTo(pX, mouseY);
 
 				}
-				backwards = Arrays.copyOf(backwards, backwards.length+1);
+
 			}
 			else {					
 				path.lineTo(p.getMousePosition().x, p.getMousePosition().y);
-			}			
+			}		
+			
+			backwards = Arrays.copyOf(backwards, backwards.length+1);
+			backwards[backwards.length-1] = toggleBackwards;
 			p.repaint();
 		}
 		if(tool == SelectedTool.EDIT) {
@@ -403,7 +413,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 			locked = false;
 		}
 		if(e.getKeyCode() == KeyEvent.VK_B) {
-			toggleBackwards = true;
+			toggleBackwards = false;
 		}
 		
 	}

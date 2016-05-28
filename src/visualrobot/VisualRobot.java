@@ -1,4 +1,4 @@
-
+package visualrobot;
 
 import java.util.HashMap;
 
@@ -6,13 +6,15 @@ import edu.wpi.first.wpilibj.*;
 
 public abstract class VisualRobot extends SampleRobot{
 	public abstract void setLeftSide(double speed);
-	public abstract void setRightSide(double speed);	
+	public abstract void setRightSide(double speed);
+	public abstract void shift(boolean on);
+	public abstract void stop();
+	
 	
 	public VisualRobot() {
 		super();
 	}
-	
-	/*
+	/* 
 	 * IMPORTANT: Definitions for sensor keys
 	 * 	"gyro"
 	 * 	"rightEncoder"
