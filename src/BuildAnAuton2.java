@@ -66,7 +66,6 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 			g2.setStroke(new BasicStroke(3));
 			g2.drawImage(field, 0, 0, null);
 			g2.draw(path);
-		
 			if(tool == SelectedTool.ADD && p.getMousePosition() != null) {
 				if(locked) {
 					int mouseX = p.getMousePosition().x;
@@ -294,12 +293,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 		export.setFocusable(false);
 		export.setFocusPainted(false);
 
-		export.addActionListener((ActionEvent e) -> {
-			double initialAngle = java.lang.Double.parseDouble(JOptionPane.showInputDialog("Intput initial angle of Robot\n"
-					+ "Towards right of screen is 0 degrees\n"
-					+ "angle increases Counter Clockwise"));
-			
-			Export.export(Export.convertToCommands(path, initialAngle, inchPerPixel, backwards));
+		export.addActionListener((ActionEvent e) -> {			
+			Export.export(Export.convertToCommands(path, inchPerPixel, backwards));
 		});
 		
 		this.addKeyListener(this);

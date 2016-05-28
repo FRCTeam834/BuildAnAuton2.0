@@ -20,13 +20,13 @@ import visualrobot.MoveStraightCommand;
 public class Export {
 	public static final double SPEED = .3;
 	
-	public static ArrayList<Command> convertToCommands(Path2D path, double initialAngle, double inchPerPixel, boolean[] backwards) {
+	public static ArrayList<Command> convertToCommands(Path2D path, double inchPerPixel, boolean[] backwards) {
 		ArrayList<Command> toExport = new ArrayList<Command>();
 		PathIterator pi = path.getPathIterator(null);
 		double[] coords = new double[6];
 		pi.currentSegment(coords);
 		
-		double lastAngle = initialAngle;
+		double lastAngle = 0;
 		double lastX = coords[0];
 		double lastY = coords[1];
 		double currX = 0;
@@ -65,6 +65,8 @@ public class Export {
 			
 			double dAngle = currAngle - lastAngle;
 			
+			if(i==0) dAngle = 0;
+
 			while(Math.abs(dAngle) > 180 ) {
 				if(dAngle < 180) {
 					dAngle += 360;
