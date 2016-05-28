@@ -91,6 +91,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 				else {					
 					g2.drawLine((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(), p.getMousePosition().x, p.getMousePosition().y);
 				}
+				
+				
 			}
 			
 			
@@ -123,24 +125,35 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 					}
 				}
 				if(type == 0) {
+					
 					g2.setColor(Color.GREEN);
-
+					
 					g2.fill(new Ellipse2D.Double(coords[0]-5, coords[1]-5, 10, 10));
 
 				}
 				
 				for(int j = 0; j < type * 2; j+=2) {
-					if(backwards[i-1] ) 
-						g2.setColor(Color.RED);
-					else
-						g2.setColor(Color.BLUE);
-
-
+					g2.setColor(Color.BLUE);
 					g2.fill(new Ellipse2D.Double(coords[j]-5, coords[j+1]-5, 10, 10));
+				}
+				
+				if(i != backwards.length && backwards[i] ) {
+					g2.setColor(Color.RED);
+					
+					int[] xcoords = {(int)coords[0] -1, (int) coords[0], (int)coords[0] + 1};
+					int[] ycoords = {(int) (coords[1]-1), (int) (coords[1] +1), (int) (coords[1]-1)};
+					g2.drawPolygon(xcoords, ycoords, 3);
 				}
 				
 				
 				i++;
+			}
+			
+			if(toggleBackwards && tool == SelectedTool.ADD) {
+				g2.setColor(Color.RED);
+				int[] xcoords = {(int)path.getCurrentPoint().getX() -1, (int) path.getCurrentPoint().getX(), (int)path.getCurrentPoint().getX() + 1};
+				int[] ycoords = {(int) (path.getCurrentPoint().getY()-1), (int) (path.getCurrentPoint().getY() +1), (int) (path.getCurrentPoint().getY()-1)};
+				g2.drawPolygon(xcoords, ycoords, 3);
 			}
 			
 			if(minDistance < 20) {
@@ -271,7 +284,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 			for(JButton b: tools) {
 				b.setEnabled(true);
 			}
-
+			backwards = new boolean[0];
 			tool = SelectedTool.NONE;
 			path.reset();
 			path.moveTo(field.getWidth()/2, field.getHeight()/2);
@@ -292,7 +305,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 					+ "Towards right of screen is 0 degrees\n"
 					+ "angle increases Counter Clockwise"));
 			
-			Export.export(Export.convertToCommands(path, initialAngle, inchPerPixel));
+			Export.export(Export.convertToCommands(path, initialAngle, inchPerPixel, backwards));
 		});
 		
 		this.addKeyListener(this);

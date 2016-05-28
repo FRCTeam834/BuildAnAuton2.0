@@ -18,7 +18,7 @@ import visualrobot.TurnCommand;
 import visualrobot.MoveStraightCommand;
 
 public class Export {
-	
+	public static final double SPEED = .3;
 	
 	public static ArrayList<Command> convertToCommands(Path2D path, double initialAngle, double inchPerPixel, boolean[] backwards) {
 		ArrayList<Command> toExport = new ArrayList<Command>();
@@ -34,6 +34,7 @@ public class Export {
 		double currAngle = 0;
 
 		pi.next();
+		int i = 0;
 		
 		for(; !pi.isDone(); pi.next()) {
 			pi.currentSegment(coords);
@@ -57,6 +58,11 @@ public class Export {
 				currAngle = Math.atan(dY/dX)*180.0/Math.PI + 180.0;
 			}
 			
+			if(backwards[i]) {
+				currAngle +=180;
+			}
+			
+			
 			double dAngle = currAngle - lastAngle;
 			
 			while(Math.abs(dAngle) > 180 ) {
@@ -68,16 +74,17 @@ public class Export {
 				}
 			}
 			
-			toExport.add(new TurnCommand(dAngle, .3, null));
+			toExport.add(new TurnCommand(dAngle, SPEED, null));
 
 			double distance = Math.sqrt(dX*dX+dY*dY) * inchPerPixel;
-			toExport.add(new MoveStraightCommand(distance, .3, null));
+			toExport.add(new MoveStraightCommand(distance, backwards[i] ? -SPEED : SPEED, null));
 			
-			System.out.println(dAngle+ " degrees, " + distance + " inches.");
+			System.out.println(dAngle+ " degrees, " + ((backwards[i] ? -1:1)*  distance) + " inches.");
 			lastX = currX;
 			lastY = currY;
 			lastAngle = currAngle;
 			
+			i++;
 		}
 		
 		return toExport;
