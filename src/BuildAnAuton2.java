@@ -173,7 +173,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 	public BuildAnAuton2() {
 
 		try {
-			field = ImageIO.read(new File("field.png"));
+			field = ImageIO.read(new File("garage.png"));
 		} 		
 		catch (IOException e) {
 			e.printStackTrace();
@@ -183,7 +183,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 		this.setLayout(new BorderLayout());
 
 		
-		inchPerPixel = 650.22/field.getWidth();
+		inchPerPixel = /*650.22*/216.0/field.getWidth();
 		
 		scrollPane.setViewportView(p);
 		scrollPane.setPreferredSize(new Dimension(field.getWidth(), field.getHeight()));

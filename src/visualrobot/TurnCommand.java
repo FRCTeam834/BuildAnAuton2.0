@@ -28,6 +28,7 @@ public class TurnCommand implements Command {
 			robot.setRightSide(0.0);
 			robot.setLeftSide(0.0);
 		}
+		System.out.println("Error = " + (gyro.getAngle()-angle) + " degrees");
 	}
 	
 	public TurnCommand() {

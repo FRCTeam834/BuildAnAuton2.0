@@ -50,6 +50,8 @@ public class MoveStraightCommand implements Command {
 		}
 		robot.setLeftSide(0.0);
 		robot.setRightSide(0.0);
+		System.out.println("Error = " + (Math.abs(REncoder.getDistance() + LEncoder.getDistance()) / 2-distance) + " inches");
+
 	}
 	
 	public void setRobot(VisualRobot r) {
