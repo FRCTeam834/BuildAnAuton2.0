@@ -1,25 +1,21 @@
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
-import java.awt.geom.Path2D.Double;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.imageio.ImageIO;
@@ -27,9 +23,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
 import javax.swing.JToolBar;
 
 public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
@@ -186,7 +180,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 		inchPerPixel = /*650.22*/216.0/field.getWidth();
 		
 		scrollPane.setViewportView(p);
-		scrollPane.setPreferredSize(new Dimension(field.getWidth(), field.getHeight()));
+		scrollPane.setPreferredSize(new Dimension(field.getWidth()+4, field.getHeight()+4));
 		p.setPreferredSize(new Dimension(field.getWidth(), field.getHeight()));
 		scrollPane.addMouseListener(this);
 		
@@ -343,32 +337,54 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 			p.repaint();
 		}
 		if(tool == SelectedTool.EDIT) {
-			dragging = true;
+			
+			if(toggleBackwards && indexSelected != backwards.length && indexSelected != -1) {
+				backwards[indexSelected] = !backwards[indexSelected];
+			}
+			else {
+				dragging = true;
+
+			}
+
+
 		}
-		if(tool == SelectedTool.DEL) {
+		if(tool == SelectedTool.DEL && indexSelected > 0) {
 			double[] coords = new double[6];
-			Path2D.Double temp = new Path2D.Double();
+			
+			Path2D.Double tempPath = new Path2D.Double();
+			boolean[] tempBackwards = new boolean[backwards.length-1];
+			
 			PathIterator pi = path.getPathIterator(null);
 			pi.currentSegment(coords);
-			temp.moveTo(coords[0], coords[1]);
+			tempPath.moveTo(coords[0], coords[1]);
 			pi.next();
-			backwards = Arrays.copyOf(backwards, backwards.length-1);
-			
+
 			int i = 1;
+			int count = 0;
+
+						
 			for(; !pi.isDone(); pi.next()) {
 				pi.currentSegment(coords);
 				if(indexSelected == i) {
+					if(i!=backwards.length) {
+						backwards[i] = false;
+					}
 				}
 				else {
-					temp.lineTo(coords[0], coords[1]);
-					
+					tempPath.lineTo(coords[0], coords[1]);
+					tempBackwards[count] = backwards[i-1];
+
+					count++;
 				}
-				
+
 				i++;
 			}
 			indexSelected = -1;
+			
 
-			path = temp;
+			
+			backwards = tempBackwards;
+			path = tempPath;
 			p.repaint();
 		}
 	}
@@ -415,7 +431,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 				locked = true;
 		}
 		if(e.getKeyCode() == KeyEvent.VK_B) {
-			if(tool == SelectedTool.ADD) 
+			if(tool == SelectedTool.ADD || tool == SelectedTool.EDIT) 
 				toggleBackwards = true;
 		}
 	}
