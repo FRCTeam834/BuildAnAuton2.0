@@ -22,9 +22,10 @@ import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
+
+import java.net.URL;
 
 public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 	
@@ -165,12 +166,16 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 		
 	public BuildAnAuton2() {
 
-		try {
-			field = ImageIO.read(new File("field.png"));
-		} 		
-		catch (IOException e) {
-			e.printStackTrace();
+		URL ImageURL = BuildAnAuton2.class.getResource("field.png");
+		if(ImageURL != null) {
+			try {
+				field = ImageIO.read(ImageURL);
+			} 		
+			catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
+		
 		path.moveTo(field.getWidth()/2, field.getHeight()/2);
 
 		this.setLayout(new BorderLayout());

@@ -18,7 +18,7 @@ import visualrobot.TurnCommand;
 import visualrobot.MoveStraightCommand;
 
 public class Export {
-	public static final double SPEED = .3;
+	public static double SPEED = .3;
 	
 	public static ArrayList<Command> convertToCommands(Path2D path, double inchPerPixel, boolean[] backwards) {
 		ArrayList<Command> toExport = new ArrayList<Command>();
@@ -36,6 +36,11 @@ public class Export {
 		pi.next();
 		int i = 0;
 		
+		SPEED = Double.parseDouble(JOptionPane.showInputDialog("Enter a speed between 0.0 and 1.0"));
+		
+		SPEED = SPEED > 1 ? 1.0 : SPEED; 
+		SPEED = SPEED <= 0 ? 0 : SPEED; 
+
 		for(; !pi.isDone(); pi.next()) {
 			pi.currentSegment(coords);
 			currX = coords[0];
