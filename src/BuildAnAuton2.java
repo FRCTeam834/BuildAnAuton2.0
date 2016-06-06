@@ -34,12 +34,11 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 		JButton edit = new JButton("Edit");
 		JButton delete = new JButton("Delete");
 		JButton restart = new JButton("Restart");
-	
+		JButton export = new JButton("Export");
+
 	JButton[] tools = {add, edit, delete, restart};
 		
-	
-	JButton export = new JButton("Export");
-	
+		
 	private enum SelectedTool {
 		NONE,
 		ADD,
@@ -52,13 +51,13 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 	int indexSelected = -1;
 	
 	boolean locked = false;
-	
-	double inchPerPixel = 0;
-	JScrollPane scrollPane = new JScrollPane();
-	
+		
 	public boolean[] backwards = new boolean[0];
 	boolean toggleBackwards = false;
 	
+	double inchPerPixel = 0;
+	JScrollPane scrollPane = new JScrollPane();
+
 	JComponent p = new JComponent() {
 		public void paintComponent(Graphics g) {
 			Graphics2D g2 = (Graphics2D) g;
@@ -166,15 +165,25 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 		
 	public BuildAnAuton2() {
 
+		try {
+
 		URL ImageURL = BuildAnAuton2.class.getResource("field.png");
 		if(ImageURL != null) {
-			try {
 				field = ImageIO.read(ImageURL);
-			} 		
-			catch (IOException e) {
-				e.printStackTrace();
-			}
+			
+
 		}
+		else{
+			field = ImageIO.read(new File("field.png"));
+
+		}
+
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+
+		}
+
 		
 		path.moveTo(field.getWidth()/2, field.getHeight()/2);
 
@@ -192,6 +201,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 		toolbar.add(edit);
 		toolbar.add(delete);
 		toolbar.add(restart);
+		toolbar.add(export);
 		add.addActionListener((ActionEvent e) -> {
 			for(JButton b: tools) {
 				b.setEnabled(true);
@@ -307,7 +317,6 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 		
 		add(toolbar, BorderLayout.PAGE_START);
 		add(scrollPane, BorderLayout.CENTER);
-		add(export, BorderLayout.SOUTH);
 
 	}
 
