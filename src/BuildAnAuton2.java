@@ -53,8 +53,6 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 	int curveSelected = -1;
 	int pointSelected = -1;
 	
-	boolean locked = false;
-	boolean toggleBackwards = false;
 	HashMap<Integer, Boolean> keys = new HashMap<>();
 	
 	boolean[] backwards = new boolean[0];
@@ -71,7 +69,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 			g2.drawImage(field, 0, 0, null);
 			g2.draw(path);
 			if(tool == SelectedTool.ADD && p.getMousePosition() != null) {
-				if(locked) {
+				if(keys.get(KeyEvent.VK_SHIFT)) {
 					int mouseX = p.getMousePosition().x;
 					int mouseY = p.getMousePosition().y;
 					int pX = (int) path.getCurrentPoint().getX();
@@ -161,7 +159,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 				i++;
 			}
 			
-			if(toggleBackwards && tool == SelectedTool.ADD) {
+			if(keys.get(KeyEvent.VK_B) && tool == SelectedTool.ADD) {
 				g2.setColor(Color.RED);
 				int[] xcoords = {(int)path.getCurrentPoint().getX() -1, (int) path.getCurrentPoint().getX(), (int)path.getCurrentPoint().getX() + 1};
 				int[] ycoords = {(int) (path.getCurrentPoint().getY()-1), (int) (path.getCurrentPoint().getY() +1), (int) (path.getCurrentPoint().getY()-1)};
@@ -251,7 +249,6 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 			tool = SelectedTool.EDIT;
 			Thread t = new Thread(() ->{
 				while(tool == SelectedTool.EDIT) {
-					
 					if(dragging && p.getMousePosition() != null) {
 						int i = 1;
 						int j = 1;
@@ -358,7 +355,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 
 	public void mousePressed(MouseEvent e) {
 		if(tool == SelectedTool.ADD) {
-			if(keys.get(KeyEvent.VK_SHIFT)) {
+
+			if(keys.get(KeyEvent.VK_SHIFT).booleanValue()) {
 				int mouseX = p.getMousePosition().x;
 				int mouseY = p.getMousePosition().y;
 				int pX = (int) path.getCurrentPoint().getX();
@@ -378,12 +376,12 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 			}		
 			
 			backwards = Arrays.copyOf(backwards, backwards.length+1);
-			backwards[backwards.length-1] = toggleBackwards;
+			backwards[backwards.length-1] = keys.get(KeyEvent.VK_B);
 			p.repaint();
 		}
 		if(tool == SelectedTool.EDIT) {
 			
-			if(toggleBackwards && curveSelected != backwards.length && curveSelected != -1) {
+			if(keys.get(KeyEvent.VK_B) && curveSelected != backwards.length && curveSelected != -1) {
 				backwards[curveSelected] = !backwards[curveSelected];
 			}
 			else {
