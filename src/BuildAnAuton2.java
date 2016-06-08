@@ -17,6 +17,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -27,7 +28,7 @@ import javax.swing.JToolBar;
 
 import java.net.URL;
 
-public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
+public class BuildAnAuton2 extends JFrame implements MouseListener{
 	
 	JToolBar toolbar = new JToolBar();
 		JButton add = new JButton("Add");
@@ -42,18 +43,21 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 	private enum SelectedTool {
 		NONE,
 		ADD,
+		ADD2,
 		EDIT,
 		DEL;
 	}
 	SelectedTool tool = SelectedTool.NONE;
 	
 	boolean dragging = false;
-	int indexSelected = -1;
+	int curveSelected = -1;
+	int pointSelected = -1;
 	
 	boolean locked = false;
-		
-	public boolean[] backwards = new boolean[0];
 	boolean toggleBackwards = false;
+	HashMap<Integer, Boolean> keys = new HashMap<>();
+	
+	boolean[] backwards = new boolean[0];
 	
 	double inchPerPixel = 0;
 	JScrollPane scrollPane = new JScrollPane();
@@ -93,6 +97,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 			
 			double[] coords = new double[6];
 			int i = 0;
+			int j = 0;
 			boolean done = false;
 			
 			
@@ -103,31 +108,45 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 			
 			for(; !pi.isDone() && !done; pi.next()) {
 				int type = pi.currentSegment(coords);
-				if(tool == SelectedTool.EDIT || tool == SelectedTool.DEL) {
-					if(p.getMousePosition() != null) {
+
+				if(type == 0) {
+					
+					g2.setColor(Color.GREEN);
+					if((tool == SelectedTool.EDIT || tool == SelectedTool.DEL) && p.getMousePosition() != null) {
 						double temp = p.getMousePosition().distance(coords[0], coords[1]);
 						
 						if(temp < minDistance){
 							minDistance = temp;
 							
 							if(!dragging)
-							indexSelected = i;
+							curveSelected = i;
 
 							selected = new Point((int) coords[0], (int)coords[1]);
 						}
+					
 					}
-				}
-				if(type == 0) {
-					
-					g2.setColor(Color.GREEN);
-					
 					g2.fill(new Ellipse2D.Double(coords[0]-5, coords[1]-5, 10, 10));
-
+					j++;
 				}
 				
-				for(int j = 0; j < type * 2; j+=2) {
+				for(int k = 0; k < type * 2; k+=2) {
 					g2.setColor(Color.BLUE);
-					g2.fill(new Ellipse2D.Double(coords[j]-5, coords[j+1]-5, 10, 10));
+					g2.fill(new Ellipse2D.Double(coords[k]-5, coords[k+1]-5, 10, 10));
+					if((tool == SelectedTool.EDIT || tool == SelectedTool.DEL) && p.getMousePosition() != null) {
+						double temp = p.getMousePosition().distance(coords[k], coords[k+1]);
+						
+						if(temp < minDistance){
+							minDistance = temp;
+							
+							if(!dragging) {
+								curveSelected = i;
+								pointSelected = j;
+							}
+							selected = new Point((int) coords[k], (int)coords[k+1]);
+						}
+					
+					}
+					j++;
 				}
 				
 				if(i != backwards.length && backwards[i] ) {
@@ -154,7 +173,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 				g2.draw(new Ellipse2D.Double(selected.x-6, selected.y-6, 12, 12));
 			}
 			else if (!dragging){
-				indexSelected = -1;
+				curveSelected = -1;
+				pointSelected = -1;
 			}
 
 		}
@@ -189,6 +209,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 
 		this.setLayout(new BorderLayout());
 
+		keys.put(KeyEvent.VK_B, false);
+		keys.put(KeyEvent.VK_SHIFT, false);
 		
 		inchPerPixel = 650.22/field.getWidth();
 		
@@ -232,12 +254,13 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 					
 					if(dragging && p.getMousePosition() != null) {
 						int i = 1;
+						int j = 1;
 						double[] coords = new double[6];
 						Path2D.Double temp = new Path2D.Double();
 						PathIterator pi = path.getPathIterator(null);
 						
 						pi.currentSegment(coords);
-						if(indexSelected == 0) {
+						if(curveSelected == 0) {
 							temp.moveTo(p.getMousePosition().x, p.getMousePosition().y);
 						}
 						else {
@@ -245,13 +268,24 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 						}
 						pi.next();
 						for(; !pi.isDone(); pi.next()) {
-							pi.currentSegment(coords);
-							if(indexSelected == i) {
-								temp.lineTo(p.getMousePosition().x, p.getMousePosition().y);
+							int type = pi.currentSegment(coords);
+							for(int k = 0; k < type * 2; k+=2) {
+								if(pointSelected == j)  {
+									coords[k] = p.getMousePosition().x;
+									coords[k] = p.getMousePosition().y;
+								}
+								j++;
 							}
-							else {
+							switch(type) {
+							case 1:
 								temp.lineTo(coords[0], coords[1]);
-								
+								break;
+							case 2:
+								temp.quadTo(coords[0], coords[1], coords[2], coords[3]);
+								break;
+							case 3:
+								temp.curveTo(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
+								break;
 							}
 							
 							i++;
@@ -312,17 +346,19 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 			Export.export(Export.convertToCommands(path, inchPerPixel, backwards));
 		});
 		
-		this.addKeyListener(this);
+		this.addKeyListener(new ToggleListener(this, keys));
 		scrollPane.requestFocusInWindow();
 		
 		add(toolbar, BorderLayout.PAGE_START);
 		add(scrollPane, BorderLayout.CENTER);
 
+		path.quadTo(0, 0, 20, 20);
+		backwards = Arrays.copyOf(backwards, 1);
 	}
 
 	public void mousePressed(MouseEvent e) {
 		if(tool == SelectedTool.ADD) {
-			if(locked) {
+			if(keys.get(KeyEvent.VK_SHIFT)) {
 				int mouseX = p.getMousePosition().x;
 				int mouseY = p.getMousePosition().y;
 				int pX = (int) path.getCurrentPoint().getX();
@@ -347,8 +383,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 		}
 		if(tool == SelectedTool.EDIT) {
 			
-			if(toggleBackwards && indexSelected != backwards.length && indexSelected != -1) {
-				backwards[indexSelected] = !backwards[indexSelected];
+			if(toggleBackwards && curveSelected != backwards.length && curveSelected != -1) {
+				backwards[curveSelected] = !backwards[curveSelected];
 			}
 			else {
 				dragging = true;
@@ -357,7 +393,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 
 
 		}
-		if(tool == SelectedTool.DEL && indexSelected > 0) {
+		if(tool == SelectedTool.DEL && curveSelected > 0) {
 			double[] coords = new double[6];
 			
 			Path2D.Double tempPath = new Path2D.Double();
@@ -374,7 +410,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 						
 			for(; !pi.isDone(); pi.next()) {
 				pi.currentSegment(coords);
-				if(indexSelected == i) {
+				if(curveSelected == i) {
 					if(i!=backwards.length) {
 						backwards[i] = false;
 					}
@@ -388,7 +424,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 
 				i++;
 			}
-			indexSelected = -1;
+			curveSelected = -1;
 			
 
 			
@@ -421,38 +457,4 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener{
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
-
-	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void keyPressed(KeyEvent e) {
-		if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-			for(JButton b: tools) {
-				b.setEnabled(true);
-			}
-			tool = SelectedTool.NONE;
-			p.repaint();
-		}
-		if(e.getKeyCode() == KeyEvent.VK_SHIFT) {
-			if(tool == SelectedTool.ADD) 
-				locked = true;
-		}
-		if(e.getKeyCode() == KeyEvent.VK_B) {
-			if(tool == SelectedTool.ADD || tool == SelectedTool.EDIT) 
-				toggleBackwards = true;
-		}
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-		if(e .getKeyCode() == KeyEvent.VK_SHIFT) {
-			locked = false;
-		}
-		if(e.getKeyCode() == KeyEvent.VK_B) {
-			toggleBackwards = false;
-		}
-		
-	}
 }
