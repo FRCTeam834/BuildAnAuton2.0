@@ -272,7 +272,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 							for(int k = 0; k < type * 2; k+=2) {
 								if(pointSelected == j)  {
 									coords[k] = p.getMousePosition().x;
-									coords[k] = p.getMousePosition().y;
+									coords[k+1] = p.getMousePosition().y;
 								}
 								j++;
 							}
