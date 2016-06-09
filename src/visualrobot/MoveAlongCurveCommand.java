@@ -14,7 +14,7 @@ public class MoveAlongCurveCommand implements Command {
 		gyro.reset();
 		
 		double fastSpeed = speed * (radius + WIDTH/2)/radius;
-		double slowSpeed = speed * (radius + WIDTH/2)/radius;
+		double slowSpeed = speed * (radius - WIDTH/2)/radius;
 
 		while(condition())
 		{
