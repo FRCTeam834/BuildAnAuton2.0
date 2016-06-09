@@ -153,8 +153,10 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 				if(i != backwards.length && backwards[i] ) {
 					g2.setColor(Color.RED);
 					
-					int[] xcoords = {(int)coords[0] -1, (int) coords[0], (int)coords[0] + 1};
-					int[] ycoords = {(int) (coords[1]-1), (int) (coords[1] +1), (int) (coords[1]-1)};
+					int k = type == 0 ? 0 : type * 2 - 2;
+					
+					int[] xcoords = {(int)coords[k] -1, (int) coords[k], (int)coords[k] + 1};
+					int[] ycoords = {(int) (coords[k+1]-1), (int) (coords[k+1] +1), (int) (coords[k+1]-1)};
 					g2.drawPolygon(xcoords, ycoords, 3);
 				}
 				

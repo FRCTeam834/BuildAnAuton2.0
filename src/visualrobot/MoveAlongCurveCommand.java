@@ -7,28 +7,30 @@ public class MoveAlongCurveCommand implements Command {
 
 	private VisualRobot robot;
 	private double radius, speed, angle;
-	private final double WIDTH = 25.0;
+	private final double WIDTH = 26.0;
 	private GyroBase gyro;
 
 	public void execute() throws NullPointerException {
 		gyro.reset();
-		System.out.println("Running");
-		if(angle < 0)
-			while(gyro.getAngle() > angle && robot.isAutonomous())
-			{
-				robot.setLeftSide(speed * (radius -WIDTH/2)/radius);
-				robot.setRightSide(speed * (radius + WIDTH/2)/radius);
+		
+		double fastSpeed = speed * (radius + WIDTH/2)/radius;
+		double slowSpeed = speed * (radius + WIDTH/2)/radius;
+
+		while(condition())
+		{
+			if((angle > 0 && speed > 0) || (angle < 0 && speed < 0)) {
+				robot.setLeftSide(fastSpeed);
+				robot.setRightSide(slowSpeed);
 			}
-		else if(angle > 0)
-			while(gyro.getAngle() < angle && robot.isAutonomous())
-			{
-				robot.setLeftSide(speed * (radius + WIDTH/2)/radius);
-				robot.setRightSide(speed * (radius -WIDTH/2)/radius);
+			else if((angle > 0 && speed < 0) || (angle < 0 && speed > 0)) {
+				robot.setRightSide(fastSpeed);
+				robot.setLeftSide(slowSpeed);
 			}
+			
+		}		
 		
 		robot.setLeftSide(0.0);
 		robot.setRightSide(0.0);
-		System.out.println("Done Running");
 
 	}
 
@@ -38,15 +40,12 @@ public class MoveAlongCurveCommand implements Command {
 		gyro = (GyroBase)robot.getSensors().get("gyro");
 	}
 	
-	public MoveAlongCurveCommand() {
-	}
 
 	/**
 	 * 
-	 * @param dir The direction in which to move.
-	 * @param rad The radius of the robot.
-	 * @param s The speed at which to move.
-	 * @param ang The angle to move to.
+	 * @param rad The radius of the robot movement.
+	 * @param s The speed at which to move if negative, moves backwards.
+	 * @param ang The angle to move to, positive is cw, negative is cc
 	 * @param r The robot.
 	 */
 	public MoveAlongCurveCommand(double rad, double s, double ang, VisualRobot r) {
@@ -55,9 +54,18 @@ public class MoveAlongCurveCommand implements Command {
 		angle = ang;
 		if(r!=null) setRobot(r);
 		
-		if(speed * (radius + WIDTH/2)/radius >= 1.0 ) {
-			speed = 1/(radius + WIDTH/2)/radius;
+		if(Math.abs(speed * (radius + WIDTH/2)/radius) >= 1.0 ) {
+			speed = Math.signum(speed) * 1/(radius + WIDTH/2)/radius;
 		}
 
+	}
+	
+	private boolean condition() {
+		if(angle  < 0)
+			return gyro.getAngle() > angle && robot.isAutonomous();
+		else if(angle > 0) 
+			return gyro.getAngle() < angle && robot.isAutonomous();
+					
+		return false;
 	}
 }

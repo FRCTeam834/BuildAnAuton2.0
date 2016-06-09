@@ -34,62 +34,60 @@ public class Export {
 		double currAngle = 0;
 
 		pi.next();
-		int i = 0;
-		
+		int i = 0;		
 		SPEED = Double.parseDouble(JOptionPane.showInputDialog("Enter a speed between 0.0 and 1.0"));
 		
 		SPEED = SPEED > 1 ? 1.0 : SPEED; 
 		SPEED = SPEED <= 0 ? 0 : SPEED; 
 
+		
 		for(; !pi.isDone(); pi.next()) {
-			pi.currentSegment(coords);
-			currX = coords[0];
-			currY = coords[1];
+			int type = pi.currentSegment(coords);
 			
-			double dX = currX-lastX;
-			double dY = currY-lastY;
-			if(dX == 0) {
-				if(dY == 0){
-					currAngle = lastAngle;
+			
+			
+			switch(type) {
+			case 1:
+				currX = coords[0];
+				currY = coords[1];
+				
+				double dX = currX-lastX;
+				double dY = currY-lastY;
+	
+				
+				currAngle = getCurrAngle(dX, dY, lastAngle);
+				
+				if(backwards[i]) {
+					currAngle +=180;
 				}
-				else {
-					currAngle = dY < 0 ? 270 : 90;
+				
+				double dAngle = currAngle - lastAngle;
+	
+				
+				if(i==0) dAngle = 0;
+	
+				while(Math.abs(dAngle) > 180 ) {
+					if(dAngle < 180) {
+						dAngle += 360;
+					}
+					if(dAngle > 180) {
+						dAngle -= 360;
+					}
 				}
+				
+				toExport.add(new TurnCommand(dAngle, SPEED, null));
+	
+				double distance = Math.sqrt(dX*dX+dY*dY) * inchPerPixel;
+				toExport.add(new MoveStraightCommand(distance, backwards[i] ? -SPEED : SPEED, null));
+				
+				System.out.println(dAngle+ " degrees, " + ((backwards[i] ? -1:1)*  distance) + " inches.");
+				lastX = currX;
+				lastY = currY;
+				lastAngle = currAngle;
+				break;
+			case 2:
+				
 			}
-			else if(dX > 0) {
-				currAngle = Math.atan(dY/dX)*180.0/Math.PI;
-			}
-			else {
-				currAngle = Math.atan(dY/dX)*180.0/Math.PI + 180.0;
-			}
-			
-			if(backwards[i]) {
-				currAngle +=180;
-			}
-			
-			
-			double dAngle = currAngle - lastAngle;
-			
-			if(i==0) dAngle = 0;
-
-			while(Math.abs(dAngle) > 180 ) {
-				if(dAngle < 180) {
-					dAngle += 360;
-				}
-				if(dAngle > 180) {
-					dAngle -= 360;
-				}
-			}
-			
-			toExport.add(new TurnCommand(dAngle, SPEED, null));
-
-			double distance = Math.sqrt(dX*dX+dY*dY) * inchPerPixel;
-			toExport.add(new MoveStraightCommand(distance, backwards[i] ? -SPEED : SPEED, null));
-			
-			System.out.println(dAngle+ " degrees, " + ((backwards[i] ? -1:1)*  distance) + " inches.");
-			lastX = currX;
-			lastY = currY;
-			lastAngle = currAngle;
 			
 			i++;
 		}
@@ -130,4 +128,25 @@ public class Export {
 		}
 	}
 
+	private static double getCurrAngle(double dX, double dY, double lastAngle) {
+		double currAngle;
+		if(dX == 0) {
+			if(dY == 0){
+				currAngle = lastAngle;
+			}
+			else {
+				currAngle = dY < 0 ? 270 : 90;
+			}
+		}
+		else if(dX > 0) {
+			currAngle = Math.atan(dY/dX)*180.0/Math.PI;
+		}
+		else {
+			currAngle = Math.atan(dY/dX)*180.0/Math.PI + 180.0;
+		}
+		
+		return currAngle;
+	}
+
+	private static void convertQuad(ArrayList<Command> commands, double lastX, double lastY, double lastAngle, boolean backwards){}
 }
