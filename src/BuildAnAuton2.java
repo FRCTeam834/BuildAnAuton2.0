@@ -32,6 +32,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 	
 	JToolBar toolbar = new JToolBar();
 		JButton add = new JButton("Add");
+		JButton add2 = new JButton("Add Curve");
 		JButton edit = new JButton("Edit");
 		JButton delete = new JButton("Delete");
 		JButton restart = new JButton("Restart");
@@ -50,6 +51,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 	SelectedTool tool = SelectedTool.NONE;
 	
 	boolean dragging = false;
+	int addStep;
+	
 	int curveSelected = -1;
 	int pointSelected = -1;
 	
