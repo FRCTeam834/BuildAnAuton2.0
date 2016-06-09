@@ -1,5 +1,10 @@
- import java.awt.geom.Path2D;
+ import java.awt.Color;
+import java.awt.geom.Arc2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
+import java.awt.geom.Point2D;
+import java.awt.geom.QuadCurve2D;
+import java.awt.geom.Rectangle2D;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,7 +18,7 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 
 import visualrobot.Command;
-
+import visualrobot.MoveAlongCurveCommand;
 import visualrobot.TurnCommand;
 import visualrobot.MoveStraightCommand;
 
@@ -53,7 +58,6 @@ public class Export {
 				
 				double dX = currX-lastX;
 				double dY = currY-lastY;
-	
 				
 				currAngle = getCurrAngle(dX, dY, lastAngle);
 				
@@ -62,7 +66,6 @@ public class Export {
 				}
 				
 				double dAngle = currAngle - lastAngle;
-	
 				
 				if(i==0) dAngle = 0;
 	
@@ -87,6 +90,12 @@ public class Export {
 				break;
 			case 2:
 				
+				QuadCurveEquation q = new QuadCurveEquation(new QuadCurve2D.Double(lastX, lastY, coords[0], coords[1], coords[2], coords[3]));
+				
+				convertCurve(toExport, 0, q, lastAngle + 90, backwards[i], inchPerPixel);
+				break;
+			case 3:
+				break;
 			}
 			
 			i++;
@@ -148,5 +157,113 @@ public class Export {
 		return currAngle;
 	}
 
-	private static void convertQuad(ArrayList<Command> commands, double lastX, double lastY, double lastAngle, boolean backwards){}
+	private static void convertCurve(ArrayList<Command> commands, double start, CurveEquation curve, double lastAngle, boolean backwards, double inchPerPixel) {
+		double x = curve.getX(0);
+		double y = curve.getY(0);
+		double goal = 1.0;
+		double error = 0;
+		boolean lastError = true;
+		boolean done = false;
+		Arc2D.Double arc;
+		double radius = 0;
+		Point2D.Double center = null;
+		
+		double floor = start, ceil = 2.0;
+		do {
+		
+			
+//			if(prevCenter == null) 
+				center = findCenter(x, y, curve.getX((start + goal)/2), curve.getY((start + goal)/2), curve.getX(goal), curve.getY(goal));
+//			else 
+//				center = findCenter2(x, y, prevCenter.x, prevCenter.y, curve.getX(goal), curve.getY(goal));
+
+			if(center == null) return;
+			radius = center.distance(x, y);
+			
+			error = Math.abs(center.distance(curve.getX(start+ (goal-start)/4), curve.getY(start+ (goal-start)/4)) - radius);
+			error += Math.abs(center.distance(curve.getX(start+ 3*(goal-start)/4), curve.getY(start + 3*(goal-start)/4)) - radius);
+			
+			
+			if(error > .5) {
+				if(!lastError) {
+					done = true;
+				}
+				else {
+					ceil = goal;
+					goal = (floor + ceil)/2;
+				}
+				lastError = true;
+			}
+			else if(goal == 1) {
+				done = true;
+			}
+			else {
+				floor = goal;
+				goal = (floor + ceil)/2;				
+				lastError = false;
+			}
+		}
+		while(!done);
+//		System.out.println(error);
+ 		
+		double iAngle = Math.atan2(-curve.getY(start)+center.y, curve.getX(start)-center.x) * 180/Math.PI;
+		double fAngle = Math.atan2(-curve.getY(goal)+center.y, curve.getX(goal)-center.x) * 180/Math.PI;
+		double mAngle = Math.atan2(-curve.getY((goal + start)/2)+center.y, curve.getX((goal + start)/2)-center.x) * 180/Math.PI;
+		
+		
+		if(iAngle < 0) iAngle +=360;
+		if(fAngle < 0) fAngle +=360;
+		if(mAngle < 0) mAngle +=360;
+
+		double dTheta = fAngle-iAngle;
+		
+		if(!(mAngle < iAngle && mAngle>fAngle || mAngle >iAngle && mAngle < fAngle)) {
+			if(dTheta > 0) {
+				dTheta -= 360;
+			}
+			else if(dTheta < -0) {
+				dTheta += 360;
+			}
+		}
+		else {
+			
+		}
+		
+		double AngleError = iAngle - lastAngle;
+
+		commands.add(new TurnCommand(AngleError, SPEED, null));
+		commands.add(new MoveAlongCurveCommand(radius * inchPerPixel, SPEED, dTheta, null)); 
+
+		System.out.println("Turning " + AngleError + " Degrees");
+		System.out.println("Extent: " + dTheta + "\tRadius: " + radius * inchPerPixel);
+		
+		if(goal < 1) {
+			convertCurve(commands, goal, curve, fAngle, backwards, inchPerPixel);
+		}
+		
+
+	}
+	public static Point2D.Double findCenter(double x1, double y1, double x2, double y2, double x3, double y3) {
+		double midPoint1x = (x1+x2)/2;
+		double midPoint1y = (y1+y2)/2;
+		double midPoint2x = (x2+x3)/2;
+		double midPoint2y = (y2+y3)/2;
+
+
+		if(y2-y1 == 0 || y3-y2 == 0) {
+			return null;
+		}
+		
+		double slope1 = -1*(x2-x1)/(y2-y1);
+		double slope2 = -1*(x3-x2)/(y3-y2);
+
+		if(slope1 != slope2) {
+		
+			double x = ((midPoint2y-midPoint1y) + (slope1*midPoint1x-slope2*midPoint2x))/(slope1-slope2);
+			double y = slope1*(x-midPoint1x) + midPoint1y;
+			return new Point2D.Double(x, y);
+		}
+		return null;
+	}
+
 }

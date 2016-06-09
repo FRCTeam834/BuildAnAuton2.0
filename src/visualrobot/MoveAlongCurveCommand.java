@@ -7,7 +7,7 @@ public class MoveAlongCurveCommand implements Command {
 
 	private VisualRobot robot;
 	private double radius, speed, angle;
-	private final double WIDTH = 26.0;
+	private final double WIDTH = 28.0;
 	private GyroBase gyro;
 
 	public void execute() throws NullPointerException {
