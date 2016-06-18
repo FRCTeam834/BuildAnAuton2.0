@@ -12,6 +12,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
+import java.awt.geom.Point2D;
+import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -23,6 +25,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 
@@ -38,10 +41,10 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		JButton restart = new JButton("Restart");
 		JButton export = new JButton("Export");
 
-	JButton[] tools = {add, edit, delete, restart};
+	JButton[] tools = {add, add2, edit, delete, restart};
 		
-		
-	private enum SelectedTool {
+	
+	public enum SelectedTool {
 		NONE,
 		ADD,
 		ADD2,
@@ -51,7 +54,9 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 	SelectedTool tool = SelectedTool.NONE;
 	
 	boolean dragging = false;
-	int addStep;
+	
+	int addStep = 0;
+	Point temp;
 	
 	int curveSelected = -1;
 	int pointSelected = -1;
@@ -87,13 +92,29 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 					}
 				}
 				else {					
-					g2.drawLine((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(), p.getMousePosition().x, p.getMousePosition().y);
+					g2.drawLine((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(), p.getMousePosition().x, p.getMousePosition().y);			
 				}
-				
-				
 			}
 			
-			
+			if(tool == SelectedTool.ADD2 && p.getMousePosition() != null) {
+				if(addStep == 2) {
+					g2.drawLine((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(), p.getMousePosition().x, p.getMousePosition().y);			
+				}
+
+				if(addStep == 1) {
+					QuadCurve2D.Double curve = new QuadCurve2D.Double((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(),
+																	   p.getMousePosition().x, p.getMousePosition().y, 
+																	   temp.x, temp.y);
+					
+					System.out.println(temp.x + " " + temp.y);
+					g2.draw(curve);
+					
+					g2.setColor(Color.BLUE);
+					g2.fill(new Ellipse2D.Double(temp.x-5, temp.y-5, 10, 10));
+
+				}
+				
+			}
 			PathIterator pi = path.getPathIterator(null);
 			
 			double[] coords = new double[6];
@@ -164,7 +185,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 				i++;
 			}
 			
-			if(keys.get(KeyEvent.VK_B) && tool == SelectedTool.ADD) {
+			if(keys.get(KeyEvent.VK_B) && (tool == SelectedTool.ADD || tool == SelectedTool.ADD2)) {
 				g2.setColor(Color.RED);
 				int[] xcoords = {(int)path.getCurrentPoint().getX() -1, (int) path.getCurrentPoint().getX(), (int)path.getCurrentPoint().getX() + 1};
 				int[] ycoords = {(int) (path.getCurrentPoint().getY()-1), (int) (path.getCurrentPoint().getY() +1), (int) (path.getCurrentPoint().getY()-1)};
@@ -215,7 +236,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		keys.put(KeyEvent.VK_B, false);
 		keys.put(KeyEvent.VK_SHIFT, false);
 		
-		inchPerPixel = 650.22/field.getWidth();
+		inchPerPixel = 650.22/field.getWidth(); //216 for garage
 		
 		scrollPane.setViewportView(p);
 		scrollPane.setPreferredSize(new Dimension(field.getWidth()+4, field.getHeight()+4));
@@ -223,10 +244,13 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		scrollPane.addMouseListener(this);
 		
 		toolbar.add(add);
+		toolbar.add(add2);
 		toolbar.add(edit);
 		toolbar.add(delete);
 		toolbar.add(restart);
 		toolbar.add(export);
+		
+		
 		add.addActionListener((ActionEvent e) -> {
 			for(JButton b: tools) {
 				b.setEnabled(true);
@@ -246,6 +270,27 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 			t.start();
 
 		});
+		
+		add2.addActionListener((ActionEvent e) -> {
+			for(JButton b: tools) {
+				b.setEnabled(true);
+			}
+			add2.setEnabled(false);
+			tool = SelectedTool.ADD2;
+			addStep = 2;
+			Thread t = new Thread(() ->{
+				while(tool == SelectedTool.ADD2) {
+					p.repaint();
+					try {
+						Thread.sleep(20);
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+				}
+			});
+			t.start();
+		});
+		
 		edit.addActionListener((ActionEvent e) -> {
 			for(JButton b: tools) {
 				b.setEnabled(true);
@@ -354,8 +399,6 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		add(toolbar, BorderLayout.PAGE_START);
 		add(scrollPane, BorderLayout.CENTER);
 
-		path.quadTo(0, 0, 20, 20);
-		backwards = Arrays.copyOf(backwards, 1);
 	}
 
 	public void mousePressed(MouseEvent e) {
@@ -382,6 +425,26 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 			
 			backwards = Arrays.copyOf(backwards, backwards.length+1);
 			backwards[backwards.length-1] = keys.get(KeyEvent.VK_B);
+			p.repaint();
+		}
+		
+		if(tool == SelectedTool.ADD2) {
+			if(addStep == 2) {
+				temp = p.getMousePosition();
+				
+				addStep--;
+			}
+			else if(addStep == 1) {
+				
+				path.quadTo(p.getMousePosition().x, p.getMousePosition().y, temp.x, temp.y);
+				backwards = Arrays.copyOf(backwards, backwards.length+1);
+				backwards[backwards.length-1] = keys.get(KeyEvent.VK_B);
+
+				addStep--;
+				tool = SelectedTool.NONE;
+				add2.setEnabled(true);
+				
+			}
 			p.repaint();
 		}
 		if(tool == SelectedTool.EDIT) {

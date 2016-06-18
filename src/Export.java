@@ -67,7 +67,7 @@ public class Export {
 				
 				double dAngle = currAngle - lastAngle;
 				
-				if(i==0) dAngle = 0;
+//				if(i==0) dAngle = 0;
 	
 				while(Math.abs(dAngle) > 180 ) {
 					if(dAngle < 180) {
@@ -91,8 +91,8 @@ public class Export {
 			case 2:
 				
 				QuadCurveEquation q = new QuadCurveEquation(new QuadCurve2D.Double(lastX, lastY, coords[0], coords[1], coords[2], coords[3]));
-				
-				convertCurve(toExport, 0, q, lastAngle + 90, backwards[i], inchPerPixel);
+				if(backwards[i]) lastAngle += 180;
+				convertCurve(toExport, 0, q, lastAngle, backwards[i], inchPerPixel);
 				break;
 			case 3:
 				break;
@@ -164,7 +164,6 @@ public class Export {
 		double error = 0;
 		boolean lastError = true;
 		boolean done = false;
-		Arc2D.Double arc;
 		double radius = 0;
 		Point2D.Double center = null;
 		
@@ -225,20 +224,27 @@ public class Export {
 				dTheta += 360;
 			}
 		}
-		else {
-			
+
+		while(Math.abs(dTheta) > 180 ) {
+			if(dTheta < 180) {
+				dTheta += 360;
+			}
+			if(dTheta > 180) {
+				dTheta -= 360;
+			}
 		}
+
 		
-		double AngleError = iAngle - lastAngle;
+		double AngleError = iAngle + (dTheta < 0 ? -90 : 90)  - lastAngle;
 
-		commands.add(new TurnCommand(AngleError, SPEED, null));
-		commands.add(new MoveAlongCurveCommand(radius * inchPerPixel, SPEED, dTheta, null)); 
+		commands.add(new TurnCommand(-AngleError, SPEED, null));
+		commands.add(new MoveAlongCurveCommand(radius * inchPerPixel,  backwards ? -SPEED : SPEED, -dTheta, null)); 
 
-		System.out.println("Turning " + AngleError + " Degrees");
+		System.out.println("Turning " + -AngleError + " Degrees");
 		System.out.println("Extent: " + dTheta + "\tRadius: " + radius * inchPerPixel);
 		
 		if(goal < 1) {
-			convertCurve(commands, goal, curve, fAngle, backwards, inchPerPixel);
+			convertCurve(commands, goal, curve, fAngle + (dTheta < 0 ? -90 : 90), backwards, inchPerPixel);
 		}
 		
 
