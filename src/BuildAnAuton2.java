@@ -11,23 +11,36 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Path2D;
+import java.awt.geom.Path2D.Double;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import java.net.URL;
 
@@ -39,11 +52,17 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		JButton edit = new JButton("Edit");
 		JButton delete = new JButton("Delete");
 		JButton restart = new JButton("Restart");
-		JButton export = new JButton("Export");
 
 	JButton[] tools = {add, add2, edit, delete, restart};
 		
+	JFileChooser fs = new JFileChooser();
 	
+	JMenuBar menu = new JMenuBar();
+	JMenu file = new JMenu("File");
+		public JMenuItem save = new JMenuItem("Save");
+		public JMenuItem load = new JMenuItem("Load");
+		public JMenuItem export = new JMenuItem("Export");
+
 	public enum SelectedTool {
 		NONE,
 		ADD,
@@ -72,10 +91,11 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		public void paintComponent(Graphics g) {
 			Graphics2D g2 = (Graphics2D) g;
 			g2.setColor(Color.BLACK);
-
 			g2.setStroke(new BasicStroke(3));
+			
 			g2.drawImage(field, 0, 0, null);
 			g2.draw(path);
+			
 			if(tool == SelectedTool.ADD && p.getMousePosition() != null) {
 				if(keys.get(KeyEvent.VK_SHIFT)) {
 					int mouseX = p.getMousePosition().x;
@@ -105,8 +125,6 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 					QuadCurve2D.Double curve = new QuadCurve2D.Double((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(),
 																	   p.getMousePosition().x, p.getMousePosition().y, 
 																	   temp.x, temp.y);
-					
-					System.out.println(temp.x + " " + temp.y);
 					g2.draw(curve);
 					
 					g2.setColor(Color.BLUE);
@@ -202,13 +220,14 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 			}
 
 		}
+		
 	};
 	
 	BufferedImage field;
 	Path2D.Double path = new Path2D.Double();
 		
 	public BuildAnAuton2() {
-
+		
 		try {
 
 		URL ImageURL = BuildAnAuton2.class.getResource("field.png");
@@ -248,8 +267,13 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		toolbar.add(edit);
 		toolbar.add(delete);
 		toolbar.add(restart);
-		toolbar.add(export);
 		
+		file.add(save);
+		file.add(load);
+		file.add(export);
+		menu.add(file);
+		
+		fs.setFileFilter(new FileNameExtensionFilter("Auton", "aut"));
 		
 		add.addActionListener((ActionEvent e) -> {
 			for(JButton b: tools) {
@@ -381,22 +405,56 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 			
 		});
 
+
+		export.addActionListener((ActionEvent e) -> {			
+			Export.export(Export.convertToCommands(path, inchPerPixel, backwards));
+		});
+		save.addActionListener((ActionEvent e)  -> {
+			fs.showSaveDialog(this);
+			File file = fs.getSelectedFile();
+			try {
+				ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+				oos.writeObject(backwards);
+				oos.writeObject(path);
+				oos.close();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+
+			}
+		});
+		
+		load.addActionListener((ActionEvent e)  -> {
+			fs.showOpenDialog(this);
+			File file = fs.getSelectedFile();
+			try {
+				System.out.println(file.getName());
+				ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
+				backwards = (boolean[]) ois.readObject();
+				path = (Path2D.Double) ois.readObject();
+				ois.close();
+				p.repaint();
+				
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+		});
+		
 		for(JButton b: tools) {
 			b.setFocusPainted(false);
 			b.setFocusable(false);
 
 		}
-		export.setFocusable(false);
-		export.setFocusPainted(false);
 
-		export.addActionListener((ActionEvent e) -> {			
-			Export.export(Export.convertToCommands(path, inchPerPixel, backwards));
-		});
-		
 		this.addKeyListener(new ToggleListener(this, keys));
 		scrollPane.requestFocusInWindow();
 		
-		add(toolbar, BorderLayout.PAGE_START);
+		JPanel top = new JPanel();
+		top.setLayout(new BorderLayout());
+		
+		top.add(toolbar, BorderLayout.SOUTH);
+		top.add(menu, BorderLayout.NORTH);
+		
+		add(top, BorderLayout.NORTH);
 		add(scrollPane, BorderLayout.CENTER);
 
 	}
