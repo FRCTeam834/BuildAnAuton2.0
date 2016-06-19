@@ -96,14 +96,18 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 			g2.setStroke(new BasicStroke(3));
 			
 			if(field != null) {
-				g2.translate(-((zoom - 1) * field.getWidth())/2, -((zoom - 1) * field.getHeight())/2);
-
+				if(zoom < 1)
+					g2.translate(-((zoom - 1) * field.getWidth())/2, -((zoom - 1) * field.getHeight())/2);
 				g2.scale(zoom, zoom);
 			}
 			g2.drawImage(field, 0, 0, null);
 			g2.draw(path);
 			
+			
+
 			if(tool == SelectedTool.ADD && p.getMousePosition() != null) {
+			
+
 				if(keys.get(KeyEvent.VK_SHIFT)) {
 					int mouseX = getScaledMousePosition().x;
 					int mouseY = getScaledMousePosition().y;
@@ -151,8 +155,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 			double minDistance = 20;
 			Point selected = new Point(0,0);
 			
-
 			
+						
 			for(; !pi.isDone() && !done; pi.next()) {
 				int type = pi.currentSegment(coords);
 
@@ -228,6 +232,11 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 
 		}
 		
+		public Dimension getPreferredSize() {
+			return new Dimension((int) (field.getWidth() * zoom), (int) (field.getHeight() * zoom));
+		}
+		
+		
 	};
 	
 	BufferedImage field;
@@ -266,7 +275,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		
 		scrollPane.setViewportView(p);
 		scrollPane.setPreferredSize(new Dimension(field.getWidth()+4, field.getHeight()+4));
-		p.setPreferredSize(new Dimension(field.getWidth(), field.getHeight()));
+//		p.setPreferredSize(new Dimension(field.getWidth(), field.getHeight()));
+		
 		scrollPane.addMouseListener(this);
 		
 		toolbar.add(add);
@@ -505,9 +515,9 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 				backwards = Arrays.copyOf(backwards, backwards.length+1);
 				backwards[backwards.length-1] = keys.get(KeyEvent.VK_B);
 
-				addStep--;
-				tool = SelectedTool.NONE;
-				add2.setEnabled(true);
+				addStep++;
+//				tool = SelectedTool.NONE;
+//				add2.setEnabled(true);
 				
 			}
 			p.repaint();
@@ -592,15 +602,24 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		if(zoom + deltaZ >= .25 && zoom + deltaZ <= 4.0) {
 			zoom += deltaZ;
 		}
+
+//		if(zoom > 1)
+//			scrollPane.getViewport().setViewPosition(new Point((int)((zoom - 1) * field.getWidth())/2, (int) ((zoom - 1) * field.getHeight())/2));
+//		
 		p.repaint();
+		p.revalidate();
+		scrollPane.revalidate();
+		scrollPane.repaint();
 	}
 	
 	private Point getScaledMousePosition() {
 		int x = p.getMousePosition().x;
 		int y = p.getMousePosition().y;
 		
+		if(zoom < 1) {
 		x += ((zoom - 1) * field.getWidth())/2;
 		y += ((zoom - 1) * field.getHeight())/2;
+		}
 		x /= zoom;
 		y /= zoom;
 		return new Point(x, y);

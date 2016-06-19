@@ -167,6 +167,9 @@ public class Export {
 		double radius = 0;
 		Point2D.Double center = null;
 		
+		//Check if points are colinear
+		
+		
 		double floor = start, ceil = 2.0;
 		do {
 		
