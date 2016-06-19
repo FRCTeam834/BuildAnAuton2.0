@@ -87,15 +87,26 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 	double inchPerPixel = 0;
 	JScrollPane scrollPane = new JScrollPane();
 
+	public double zoom = .8;
+	
 	JComponent p = new JComponent() {
 		public void paintComponent(Graphics g) {
 			Graphics2D g2 = (Graphics2D) g;
 			g2.setColor(Color.BLACK);
 			g2.setStroke(new BasicStroke(3));
 			
+			if(field != null) {
+				g2.translate(-((zoom - 1) * field.getWidth())/2, -((zoom - 1) * field.getHeight())/2);
+
+				g2.scale(zoom, zoom);
+			}
 			g2.drawImage(field, 0, 0, null);
 			g2.draw(path);
 			
+			if(p.getMousePosition() != null) {
+				System.out.println("Actual: " + p.getMousePosition().toString());
+				System.out.println("Scaled: " + getScaledMousePosition().toString());
+			}
 			if(tool == SelectedTool.ADD && p.getMousePosition() != null) {
 				if(keys.get(KeyEvent.VK_SHIFT)) {
 					int mouseX = p.getMousePosition().x;
@@ -225,7 +236,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 	
 	BufferedImage field;
 	Path2D.Double path = new Path2D.Double();
-		
+	
 	public BuildAnAuton2() {
 		
 		try {
@@ -581,4 +592,15 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
+	private Point getScaledMousePosition() {
+		int x = p.getMousePosition().x;
+		int y = p.getMousePosition().y;
+		
+		x += ((zoom - 1) * field.getWidth())/2;
+		y += ((zoom - 1) * field.getHeight())/2;
+		x *= zoom;
+		y *= zoom;
+		return new Point(x, y);
+		
+	}
 }

@@ -16,7 +16,7 @@ public class MoveAlongCurveCommand implements Command {
 		double fastSpeed = speed * (radius + WIDTH/2)/radius;
 		double slowSpeed = speed * (radius - WIDTH/2)/radius;
 
-		while(condition())
+		while(condition() && robot.isAutonomous())
 		{
 			if((angle > 0 && speed > 0) || (angle < 0 && speed < 0)) {
 				robot.setLeftSide(fastSpeed);
