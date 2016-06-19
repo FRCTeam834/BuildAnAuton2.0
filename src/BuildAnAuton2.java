@@ -87,7 +87,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 	double inchPerPixel = 0;
 	JScrollPane scrollPane = new JScrollPane();
 
-	public double zoom = .8;
+	public double zoom = 1;
 	
 	JComponent p = new JComponent() {
 		public void paintComponent(Graphics g) {
@@ -103,14 +103,10 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 			g2.drawImage(field, 0, 0, null);
 			g2.draw(path);
 			
-			if(p.getMousePosition() != null) {
-				System.out.println("Actual: " + p.getMousePosition().toString());
-				System.out.println("Scaled: " + getScaledMousePosition().toString());
-			}
 			if(tool == SelectedTool.ADD && p.getMousePosition() != null) {
 				if(keys.get(KeyEvent.VK_SHIFT)) {
-					int mouseX = p.getMousePosition().x;
-					int mouseY = p.getMousePosition().y;
+					int mouseX = getScaledMousePosition().x;
+					int mouseY = getScaledMousePosition().y;
 					int pX = (int) path.getCurrentPoint().getX();
 					int pY = (int) path.getCurrentPoint().getY();
 					double angle = Math.atan2(mouseY-pY, mouseX-pX)*180.0/Math.PI;
@@ -123,18 +119,18 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 					}
 				}
 				else {					
-					g2.drawLine((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(), p.getMousePosition().x, p.getMousePosition().y);			
+					g2.drawLine((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(), getScaledMousePosition().x, getScaledMousePosition().y);			
 				}
 			}
 			
 			if(tool == SelectedTool.ADD2 && p.getMousePosition() != null) {
 				if(addStep == 2) {
-					g2.drawLine((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(), p.getMousePosition().x, p.getMousePosition().y);			
+					g2.drawLine((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(), getScaledMousePosition().x, getScaledMousePosition().y);			
 				}
 
 				if(addStep == 1) {
 					QuadCurve2D.Double curve = new QuadCurve2D.Double((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(),
-																	   p.getMousePosition().x, p.getMousePosition().y, 
+																	   getScaledMousePosition().x, getScaledMousePosition().y, 
 																	   temp.x, temp.y);
 					g2.draw(curve);
 					
@@ -164,7 +160,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 					
 					g2.setColor(Color.GREEN);
 					if((tool == SelectedTool.EDIT || tool == SelectedTool.DEL) && p.getMousePosition() != null) {
-						double temp = p.getMousePosition().distance(coords[0], coords[1]);
+						double temp = getScaledMousePosition().distance(coords[0], coords[1]);
 						
 						if(temp < minDistance){
 							minDistance = temp;
@@ -184,7 +180,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 					g2.setColor(Color.BLUE);
 					g2.fill(new Ellipse2D.Double(coords[k]-5, coords[k+1]-5, 10, 10));
 					if((tool == SelectedTool.EDIT || tool == SelectedTool.DEL) && p.getMousePosition() != null) {
-						double temp = p.getMousePosition().distance(coords[k], coords[k+1]);
+						double temp = getScaledMousePosition().distance(coords[k], coords[k+1]);
 						
 						if(temp < minDistance){
 							minDistance = temp;
@@ -343,7 +339,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 						
 						pi.currentSegment(coords);
 						if(curveSelected == 0) {
-							temp.moveTo(p.getMousePosition().x, p.getMousePosition().y);
+							temp.moveTo(getScaledMousePosition().x, getScaledMousePosition().y);
 						}
 						else {
 							temp.moveTo(coords[0], coords[1]);
@@ -353,8 +349,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 							int type = pi.currentSegment(coords);
 							for(int k = 0; k < type * 2; k+=2) {
 								if(pointSelected == j)  {
-									coords[k] = p.getMousePosition().x;
-									coords[k+1] = p.getMousePosition().y;
+									coords[k] = getScaledMousePosition().x;
+									coords[k+1] = getScaledMousePosition().y;
 								}
 								j++;
 							}
@@ -474,8 +470,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		if(tool == SelectedTool.ADD) {
 
 			if(keys.get(KeyEvent.VK_SHIFT).booleanValue()) {
-				int mouseX = p.getMousePosition().x;
-				int mouseY = p.getMousePosition().y;
+				int mouseX = getScaledMousePosition().x;
+				int mouseY = getScaledMousePosition().y;
 				int pX = (int) path.getCurrentPoint().getX();
 				int pY = (int) path.getCurrentPoint().getY();
 				double angle = Math.atan2(mouseY-pY, mouseX-pX)*180.0/Math.PI;
@@ -489,7 +485,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 
 			}
 			else {					
-				path.lineTo(p.getMousePosition().x, p.getMousePosition().y);
+				path.lineTo(getScaledMousePosition().x, getScaledMousePosition().y);
 			}		
 			
 			backwards = Arrays.copyOf(backwards, backwards.length+1);
@@ -499,13 +495,13 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		
 		if(tool == SelectedTool.ADD2) {
 			if(addStep == 2) {
-				temp = p.getMousePosition();
+				temp = getScaledMousePosition();
 				
 				addStep--;
 			}
 			else if(addStep == 1) {
 				
-				path.quadTo(p.getMousePosition().x, p.getMousePosition().y, temp.x, temp.y);
+				path.quadTo(getScaledMousePosition().x, getScaledMousePosition().y, temp.x, temp.y);
 				backwards = Arrays.copyOf(backwards, backwards.length+1);
 				backwards[backwards.length-1] = keys.get(KeyEvent.VK_B);
 
@@ -592,14 +588,21 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
+	public void zoom(double deltaZ) {
+		if(zoom + deltaZ >= .25 && zoom + deltaZ <= 4.0) {
+			zoom += deltaZ;
+		}
+		p.repaint();
+	}
+	
 	private Point getScaledMousePosition() {
 		int x = p.getMousePosition().x;
 		int y = p.getMousePosition().y;
 		
 		x += ((zoom - 1) * field.getWidth())/2;
 		y += ((zoom - 1) * field.getHeight())/2;
-		x *= zoom;
-		y *= zoom;
+		x /= zoom;
+		y /= zoom;
 		return new Point(x, y);
 		
 	}

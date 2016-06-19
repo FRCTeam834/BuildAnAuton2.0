@@ -30,6 +30,13 @@ public class ToggleListener implements KeyListener{
 			
 		}
 		
+		if(e.getKeyCode() == KeyEvent.VK_MINUS) {
+			frame.zoom(-.05);
+		}
+		else if(e.getKeyCode() == KeyEvent.VK_EQUALS) {
+			frame.zoom(+.05);
+		}
+		
 		
 	}
 
