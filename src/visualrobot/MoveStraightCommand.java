@@ -69,11 +69,9 @@ public class MoveStraightCommand implements Command {
 	 * 
 	 * @param dist The distance to move.
 	 * @param s The speed at which to move.
-	 * @param r The robot.
 	 */
-	public MoveStraightCommand(double dist, double s, VisualRobot r) {
+	public MoveStraightCommand(double dist, double s) {
 		distance = dist;
 		speed = s;
-		if(r!=null) setRobot(r);
 	}
 }

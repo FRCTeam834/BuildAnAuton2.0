@@ -16,37 +16,55 @@ public class Condition<T extends SensorBase> {
 	GyroBase gyro;		
 	double amount;
 	int sign;
-
+	String name;
 	
 	public static final int LESS_THAN = 0;
 	public static final int GREATER_THAN = 1;
 
 	public boolean check() {
-		if(GyroBase.class.isInstance(sensor)) {
-			System.out.println("ASDFASD");
-			GyroBase gyro = (GyroBase) sensor;
-			System.out.println(gyro.getAngle());
-			System.out.println(amount);
-			if(sign == 0) {
-				return gyro.getAngle() < amount;
+		
+		if(sensor != null) {
+			if(GyroBase.class.isInstance(sensor)) {
+				GyroBase gyro = (GyroBase) sensor;
+				if(sign == 0) {
+					return gyro.getAngle() < amount;
+				}
+				else if(sign == 1) {
+					return gyro.getAngle() > amount;
+				}
 			}
-			else if(sign == 1) {
-				return gyro.getAngle() > amount;
+			else if(Encoder.class.isInstance(sensor)) {
+				Encoder e = (Encoder) sensor;
+				if(sign == 0) {
+					return e.getDistance() < amount;
+				}
+				else if(sign == 1) {
+					return e.getDistance() > amount;
+				}
+
 			}
+			else if(DigitalInput.class.isInstance(sensor)) {
+				return ((DigitalInput) sensor).get() == (amount != 0);
+			}
+		
 		}
-	
-		
-		
+		else {
+			System.out.println(sensor.getClass().getName() + " not found");
+		}
 		return false;
+
 	}
 
-	public Condition(String name, int sign, double amount, VisualRobot r) {
+	public Condition(String name, int sign, double amount) {
+		 this.sign = sign;
+		 this.amount = amount;
+		 this.name = name;
+	}
+	
+	public void setRobot(VisualRobot r) {
 		 Object o = r.getSensors().get(name);
 		 if(o != null && SensorBase.class.isInstance(o)) 
 			 sensor = (T) o;
-
-		 this.sign = sign;
-		 this.amount = amount;
 
 	}
 
@@ -58,7 +76,7 @@ public class Condition<T extends SensorBase> {
 			return "Degrees";
 		}
 		else if(DigitalInput.class.isInstance(sensor)) {
-			return "off: 0";
+			return "off: 0, on: 1";
 		}
 		else {
 			return "Idk";

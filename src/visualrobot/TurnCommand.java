@@ -38,9 +38,8 @@ public class TurnCommand implements Command {
 	 * 
 	 * @param ang The angle of which to turn.
 	 * @param s The speed at which to turn.
-	 * @param r The robot.
 	 */
-	public TurnCommand(double ang, double s, VisualRobot r) {
+	public TurnCommand(double ang, double s) {
 		angle = ang;
 		if(s > 1.0) 
 			speed = 1.0;
@@ -48,7 +47,7 @@ public class TurnCommand implements Command {
 			speed = -1.0;
 		else
 			speed = s;
-		if(r!=null) setRobot(r);
+		
 	}
 
 	

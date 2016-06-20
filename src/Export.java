@@ -78,10 +78,10 @@ public class Export {
 					}
 				}
 				
-				toExport.add(new TurnCommand(dAngle, SPEED, null));
+				toExport.add(new TurnCommand(dAngle, SPEED));
 	
 				double distance = Math.sqrt(dX*dX+dY*dY) * inchPerPixel;
-				toExport.add(new MoveStraightCommand(distance, backwards[i] ? -SPEED : SPEED, null));
+				toExport.add(new MoveStraightCommand(distance, backwards[i] ? -SPEED : SPEED));
 				
 				System.out.println(dAngle+ " degrees, " + ((backwards[i] ? -1:1)*  distance) + " inches.");
 				lastX = currX;
@@ -240,8 +240,8 @@ public class Export {
 		
 		double AngleError = iAngle + (dTheta < 0 ? -90 : 90)  - lastAngle;
 
-		commands.add(new TurnCommand(-AngleError, SPEED, null));
-		commands.add(new MoveAlongCurveCommand(radius * inchPerPixel,  backwards ? -SPEED : SPEED, -dTheta, null)); 
+		commands.add(new TurnCommand(-AngleError, SPEED));
+		commands.add(new MoveAlongCurveCommand(radius * inchPerPixel,  backwards ? -SPEED : SPEED, -dTheta)); 
 
 		System.out.println("Turning " + -AngleError + " Degrees");
 		System.out.println("Extent: " + dTheta + "\tRadius: " + radius * inchPerPixel);

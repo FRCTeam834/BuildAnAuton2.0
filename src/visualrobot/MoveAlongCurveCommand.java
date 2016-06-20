@@ -48,11 +48,10 @@ public class MoveAlongCurveCommand implements Command {
 	 * @param ang The angle to move to, positive is cw, negative is cc
 	 * @param r The robot.
 	 */
-	public MoveAlongCurveCommand(double rad, double s, double ang, VisualRobot r) {
+	public MoveAlongCurveCommand(double rad, double s, double ang) {
 		radius = rad;
 		speed = s;
 		angle = ang;
-		if(r!=null) setRobot(r);
 		
 		if(Math.abs(speed * (radius + WIDTH/2)/radius) >= 1.0 ) {
 			speed = Math.signum(speed) * 1/(radius + WIDTH/2)/radius;
