@@ -34,6 +34,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -284,7 +285,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		toolbar.add(edit);
 		toolbar.add(delete);
 		toolbar.add(restart);
-		
+				
 		file.add(save);
 		file.add(load);
 		file.add(export);
