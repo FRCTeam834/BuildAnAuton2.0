@@ -4,9 +4,6 @@ import edu.wpi.first.wpilibj.GyroBase;
 import edu.wpi.first.wpilibj.SensorBase;
 import visualrobot.VisualRobot;
 
-import java.util.HashMap;
-
-import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 
