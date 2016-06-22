@@ -1,3 +1,4 @@
+import java.awt.AWTException;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -428,8 +429,13 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		});
 
 
-		export.addActionListener((ActionEvent e) -> {			
-			Export.export(Export.convertToCommands(path, inchPerPixel, backwards));
+		export.addActionListener((ActionEvent e) -> {		
+			double SPEED = java.lang.Double.parseDouble(JOptionPane.showInputDialog("Enter a speed between 0.0 and 1.0"));
+			
+			SPEED = SPEED > 1 ? 1.0 : SPEED; 
+			SPEED = SPEED <= 0 ? 0 : SPEED; 
+
+			Export.export(Export.convertToCommands(path.getPathIterator(null), inchPerPixel, 0, SPEED, backwards, true));
 
 		});
 		save.addActionListener((ActionEvent e)  -> {
@@ -467,8 +473,18 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 			b.setFocusable(false);
 
 		}
-
-		this.addKeyListener(new ToggleListener(this, keys));
+		
+		
+		prompt.addActionListener((ActionEvent e) -> {
+			prompt.setText("Prompt not supported yet");
+		});
+		
+		//Should probably change to bindings
+		KeyListener k = new ToggleListener(this, keys);
+		this.addKeyListener(k); 
+		
+		
+		
 		scrollPane.requestFocusInWindow();
 		
 		JPanel top = new JPanel();
@@ -517,13 +533,29 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 			}
 			else if(addStep == 1) {
 				
-				path.quadTo(getScaledMousePosition().x, getScaledMousePosition().y, temp.x, temp.y);
+				int ctrlX = getScaledMousePosition().x;
+				int ctrlY = getScaledMousePosition().y;
+				
+				
+				//Later
+//				java.awt.Robot r;
+//				
+//				try {
+//					r = new java.awt.Robot();
+//					r.mouseMove();
+//
+//				}
+//				catch (AWTException e1) {
+//					e1.printStackTrace();
+//				}
+				
+				path.quadTo(ctrlX, ctrlY, temp.x, temp.y);
 				backwards = Arrays.copyOf(backwards, backwards.length+1);
 				backwards[backwards.length-1] = keys.get(KeyEvent.VK_B);
 
-				addStep++;
-//				tool = SelectedTool.NONE;
-//				add2.setEnabled(true);
+				addStep--;
+				tool = SelectedTool.NONE;
+				add2.setEnabled(true);
 				
 			}
 			p.repaint();
@@ -591,10 +623,13 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		}
 	}
 	public void mouseEntered(MouseEvent e) {
-		
+		prompt.setFocusable(false);
+		this.requestFocus();
+		prompt.revalidate();
 	}
 	public void mouseExited(MouseEvent e) {
-		
+		prompt.setFocusable(true);
+		prompt.revalidate();
 	}
 		
 	public static void main(String[] args) {

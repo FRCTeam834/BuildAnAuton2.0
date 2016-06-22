@@ -1,3 +1,4 @@
+import java.awt.Shape;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
@@ -10,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.swing.JOptionPane;
 
@@ -23,36 +25,26 @@ import visualrobot.TurnCommand;
 import visualrobot.MoveStraightCommand;
 
 public class Export {
-	public static double SPEED = .3;
 	
-	public static ArrayList<Command> convertToCommands(Path2D path, double inchPerPixel, boolean[] backwards) {
+	
+	public static ArrayList<Command> convertToCommands(PathIterator path, double inchPerPixel, double initialAngle, double speed, boolean[] backwards, boolean flatten) {
 		ArrayList<Command> toExport = new ArrayList<Command>();
-		PathIterator pi = path.getPathIterator(null);
 		double[] coords = new double[6];
-		pi.currentSegment(coords);
+		path.currentSegment(coords);
 		
-		toExport.add(new MotorCommand("feederArm", .4));
-		toExport.add(new WaitCommand(new Condition<GyroBase>("feederArmGyro", Condition.LESS_THAN, 45)));
-		toExport.add(new MotorCommand("feederArm", .0));
-
-		
-		double lastAngle = 0;
+		double lastAngle = initialAngle;
 		double lastX = coords[0];
 		double lastY = coords[1];
 		double currX = 0;
 		double currY = 0;
 		double currAngle = 0;
 
-		pi.next();
+		path.next();
 		int i = 0;		
-		SPEED = Double.parseDouble(JOptionPane.showInputDialog("Enter a speed between 0.0 and 1.0"));
-		
-		SPEED = SPEED > 1 ? 1.0 : SPEED; 
-		SPEED = SPEED <= 0 ? 0 : SPEED; 
 
 		
-		for(; !pi.isDone(); pi.next()) {
-			int type = pi.currentSegment(coords);
+		for(; !path.isDone(); path.next()) {
+			int type = path.currentSegment(coords);
 			
 			
 			
@@ -83,10 +75,10 @@ public class Export {
 					}
 				}
 				
-				toExport.add(new TurnCommand(dAngle, SPEED));
+				toExport.add(new TurnCommand(dAngle, speed));
 	
 				double distance = Math.sqrt(dX*dX+dY*dY) * inchPerPixel;
-				toExport.add(new MoveStraightCommand(distance, backwards[i] ? -SPEED : SPEED));
+				toExport.add(new MoveStraightCommand(distance, backwards[i] ? -speed : speed));
 				
 				System.out.println(dAngle+ " degrees, " + ((backwards[i] ? -1:1)*  distance) + " inches.");
 				lastX = currX;
@@ -94,10 +86,16 @@ public class Export {
 				lastAngle = currAngle;
 				break;
 			case 2:
-				
-				QuadCurveEquation q = new QuadCurveEquation(new QuadCurve2D.Double(lastX, lastY, coords[0], coords[1], coords[2], coords[3]));
-				if(backwards[i]) lastAngle += 180;
-				convertCurve(toExport, 0, q, lastAngle, backwards[i], inchPerPixel);
+				if(flatten) {
+					QuadCurve2D.Double q = new QuadCurve2D.Double(lastX, lastY, coords[0], coords[1], coords[2], coords[3]);
+					if(backwards[i]) lastAngle += 180;
+					convertCurve2(toExport, q, lastAngle, speed, backwards[i], inchPerPixel);
+				}
+				else {
+					QuadCurveEquation q = new QuadCurveEquation(new QuadCurve2D.Double(lastX, lastY, coords[0], coords[1], coords[2], coords[3]));
+					if(backwards[i]) lastAngle += 180;
+					convertCurve(toExport, 0, q, lastAngle, speed, backwards[i], inchPerPixel);
+				}
 				break;
 			case 3:
 				break;
@@ -129,8 +127,12 @@ public class Export {
 			byte[] buffer = new byte[(int)file.length()];
 			inputStream.read(buffer);
 
-			URL url = new URL("ftp://anonymous@roborio-" + 
-					JOptionPane.showInputDialog(null,"Enter Team Number")
+			String teamNumber = JOptionPane.showInputDialog(null,"Enter Team Number");
+			if(teamNumber == null) {
+				throw new Exception();
+			}
+			
+			URL url = new URL("ftp://anonymous@roborio-" + teamNumber
 					+ "-frc.local/home/lvuser/auton.autr");
 			URLConnection conn = url.openConnection();
 			
@@ -171,7 +173,10 @@ public class Export {
 		return currAngle;
 	}
 
-	private static void convertCurve(ArrayList<Command> commands, double start, CurveEquation curve, double lastAngle, boolean backwards, double inchPerPixel) {
+	/**
+	 * Converts to sectors
+	 */
+	private static void convertCurve(ArrayList<Command> commands, double start, CurveEquation curve, double lastAngle, double speed, boolean backwards, double inchPerPixel) {
 		double x = curve.getX(0);
 		double y = curve.getY(0);
 		double goal = 1.0;
@@ -254,19 +259,39 @@ public class Export {
 		
 		double AngleError = iAngle + (dTheta < 0 ? -90 : 90)  - lastAngle;
 
-		commands.add(new TurnCommand(-AngleError, SPEED));
-		commands.add(new MoveAlongCurveCommand(radius * inchPerPixel,  backwards ? -SPEED : SPEED, -dTheta)); 
+		commands.add(new TurnCommand(-AngleError, speed));
+		commands.add(new MoveAlongCurveCommand(radius * inchPerPixel,  backwards ? -speed : speed, -dTheta)); 
 
 		System.out.println("Turning " + -AngleError + " Degrees");
 		System.out.println("Extent: " + dTheta + "\tRadius: " + radius * inchPerPixel);
 		
 		if(goal < 1) {
-			convertCurve(commands, goal, curve, fAngle + (dTheta < 0 ? -90 : 90), backwards, inchPerPixel);
+			convertCurve(commands, goal, curve, fAngle + (dTheta < 0 ? -90 : 90), speed, backwards, inchPerPixel);
 		}
 		
 
 	}
-	public static Point2D.Double findCenter(double x1, double y1, double x2, double y2, double x3, double y3) {
+
+	/**
+	 * Converts to lines
+	 */
+	private static void convertCurve2(ArrayList<Command> commands, Shape curve, double lastAngle, double speed, boolean backwards, double inchPerPixel) {
+		PathIterator pi = curve.getPathIterator(null, 2);
+		
+		int count = -1;
+		for(; pi.isDone(); pi.next()) {
+			count++;
+		}
+		boolean[] expandedBackwards = new boolean[count];
+		pi = curve.getPathIterator(null, 2);
+		
+		Arrays.fill(expandedBackwards, backwards);
+		
+		commands.addAll(convertToCommands(pi, inchPerPixel, lastAngle, speed, expandedBackwards ,false));
+		
+	}
+	
+	private static Point2D.Double findCenter(double x1, double y1, double x2, double y2, double x3, double y3) {
 		double midPoint1x = (x1+x2)/2;
 		double midPoint1y = (y1+y2)/2;
 		double midPoint2x = (x2+x3)/2;
