@@ -1,15 +1,11 @@
- import java.awt.Color;
-import java.awt.geom.Arc2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.QuadCurve2D;
-import java.awt.geom.Rectangle2D;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.net.URLConnection;
@@ -17,6 +13,10 @@ import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
+import basicCommand.Condition;
+import basicCommand.MotorCommand;
+import basicCommand.WaitCommand;
+import edu.wpi.first.wpilibj.GyroBase;
 import visualrobot.Command;
 import visualrobot.MoveAlongCurveCommand;
 import visualrobot.TurnCommand;
@@ -30,6 +30,11 @@ public class Export {
 		PathIterator pi = path.getPathIterator(null);
 		double[] coords = new double[6];
 		pi.currentSegment(coords);
+		
+		toExport.add(new MotorCommand("feederArm", .4));
+		toExport.add(new WaitCommand(new Condition<GyroBase>("feederArmGyro", Condition.LESS_THAN, 45)));
+		toExport.add(new MotorCommand("feederArm", .0));
+
 		
 		double lastAngle = 0;
 		double lastX = coords[0];
@@ -106,20 +111,26 @@ public class Export {
 	
 	public static void export(ArrayList<Command> commands) {
 		try {
+
 			File file = new File("auton.autr");
 			ObjectOutputStream oos = new ObjectOutputStream(
 									 new BufferedOutputStream(
 									 new FileOutputStream(file)));
+
 			oos.writeInt(1);
 			oos.writeInt(0);
+
 			oos.writeObject(commands);
 			oos.close();
+
+			
 			FileInputStream inputStream = new FileInputStream(file);
+
 			byte[] buffer = new byte[(int)file.length()];
 			inputStream.read(buffer);
 
 			URL url = new URL("ftp://anonymous@roborio-" + 
-					JOptionPane.showInputDialog("Enter Team Number")
+					JOptionPane.showInputDialog(null,"Enter Team Number")
 					+ "-frc.local/home/lvuser/auton.autr");
 			URLConnection conn = url.openConnection();
 			
@@ -132,8 +143,11 @@ public class Export {
 			JOptionPane.showMessageDialog(null, "Exported");
 
 			
-		} catch (IOException e) {
+		} 
+		catch (Exception e) {
 			JOptionPane.showMessageDialog(null, "Failed to Export");
+
+			e.printStackTrace();
 		}
 	}
 

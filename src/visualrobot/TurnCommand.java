@@ -1,7 +1,6 @@
 	package visualrobot;
 
 import edu.wpi.first.wpilibj.GyroBase;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class TurnCommand implements Command {
 
@@ -29,9 +28,6 @@ public class TurnCommand implements Command {
 			robot.setLeftSide(0.0);
 		}
 		System.out.println("Error = " + (gyro.getAngle()-angle) + " degrees");
-	}
-	
-	public TurnCommand() {
 	}
 	
 	/**

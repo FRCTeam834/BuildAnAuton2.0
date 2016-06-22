@@ -26,7 +26,7 @@ public abstract class VisualRobot extends SampleRobot{
 	
 	
 	/**
-	 * Do not pass the motors used in setLeftSide and setRighSide
+	 * Do not pass the motors used in setLeftSide and setRightSide
 	 * 
 	 */
 	public final HashMap<String, SpeedController> getMotors() {

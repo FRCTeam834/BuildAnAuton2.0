@@ -4,11 +4,13 @@ import edu.wpi.first.wpilibj.GyroBase;
 import edu.wpi.first.wpilibj.SensorBase;
 import visualrobot.VisualRobot;
 
+import java.io.Serializable;
+
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 
-public class Condition<T extends SensorBase> {
-	
+public class Condition<T extends SensorBase> implements Serializable {
+	private static final long serialVersionUID = -5870690387575131701L;
 	private T sensor;
 	GyroBase gyro;		
 	double amount;
@@ -23,6 +25,7 @@ public class Condition<T extends SensorBase> {
 		if(sensor != null) {
 			if(GyroBase.class.isInstance(sensor)) {
 				GyroBase gyro = (GyroBase) sensor;
+				gyro.reset();
 				if(sign == 0) {
 					return gyro.getAngle() < amount;
 				}
@@ -32,6 +35,7 @@ public class Condition<T extends SensorBase> {
 			}
 			else if(Encoder.class.isInstance(sensor)) {
 				Encoder e = (Encoder) sensor;
+				e.reset();
 				if(sign == 0) {
 					return e.getDistance() < amount;
 				}

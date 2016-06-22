@@ -4,6 +4,7 @@ import visualrobot.Command;
 import visualrobot.VisualRobot;
 
 public class WaitCommand implements Command{
+	private static final long serialVersionUID = -7715889005108327668L;
 	Condition<?> condition;
 	VisualRobot robot;
 	

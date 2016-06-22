@@ -38,8 +38,10 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -56,6 +58,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 
 	JButton[] tools = {add, add2, edit, delete, restart};
 		
+	JTextField prompt = new JTextField();
+	
 	JFileChooser fs = new JFileChooser();
 	
 	JMenuBar menu = new JMenuBar();
@@ -426,6 +430,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 
 		export.addActionListener((ActionEvent e) -> {			
 			Export.export(Export.convertToCommands(path, inchPerPixel, backwards));
+
 		});
 		save.addActionListener((ActionEvent e)  -> {
 			fs.showSaveDialog(this);
@@ -474,7 +479,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		
 		add(top, BorderLayout.NORTH);
 		add(scrollPane, BorderLayout.CENTER);
-
+		add(prompt, BorderLayout.SOUTH);
 	}
 
 	public void mousePressed(MouseEvent e) {
