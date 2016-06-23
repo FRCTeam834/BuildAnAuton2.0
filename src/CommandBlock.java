@@ -114,7 +114,11 @@ public class CommandBlock implements Serializable{
 	 * Draws the command block on the passed graphics
 	 * @param g
 	 */
-	public void paint(Graphics2D g) {
+	public void paint(Graphics2D g, boolean selected) {
+		if(selected) {
+			g.setStroke(new BasicStroke(3));
+		}
+		
 		g.setColor(primCol);
 		g.fill(new RoundRectangle2D.Double(hitbox.x, hitbox.y, WIDTH, HEIGHT/6, 8, 8));
 		g.fill(new RoundRectangle2D.Double(hitbox.x, hitbox.y + HEIGHT/6, WIDTH/2, HEIGHT * 5/6, 8, 8)); 
@@ -129,7 +133,7 @@ public class CommandBlock implements Serializable{
 		g.drawString("Delete", hitbox.x + 4, hitbox.y + HEIGHT - 5);
 		g.drawString("Edit", hitbox.x + 4 + WIDTH/2, hitbox.y + HEIGHT - 5);
 		
-		
+		g.setStroke(new BasicStroke(1));
 	}
 	
 }

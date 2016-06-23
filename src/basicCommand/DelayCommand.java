@@ -16,6 +16,10 @@ public class DelayCommand implements Command {
 	public void setRobot(VisualRobot r) {
 	}
 	
+	public void set(double t) {
+		
+	}
+	
 	public DelayCommand() {
 		
 	}
@@ -25,7 +29,7 @@ public class DelayCommand implements Command {
 	 * @param dir The direction in which to move.
 	 * @param r The robot.
 	 */
-	public DelayCommand(double t) {
-		time = t;
+	public DelayCommand(double time) {
+		this.time = time;
 	}
 }

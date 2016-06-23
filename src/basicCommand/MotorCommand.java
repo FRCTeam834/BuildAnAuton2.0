@@ -21,9 +21,9 @@ public class MotorCommand implements Command{
 		
 	}
 	
-	public MotorCommand(String n, double s) {
-		speed = s;
-		name = n;
+	public MotorCommand(String name, double speed) {
+		this.speed = speed;
+		this.name = name;
 	}
 
 	public void setRobot(VisualRobot r) {

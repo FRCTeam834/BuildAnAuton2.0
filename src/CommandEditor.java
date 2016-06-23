@@ -11,14 +11,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Line2D;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -35,9 +27,6 @@ import basicCommand.DelayCommand;
 import basicCommand.MotorCommand;
 import basicCommand.WaitCommand;
 import visualrobot.Command;
-import visualrobot.MoveAlongCurveCommand;
-import visualrobot.MoveStraightCommand;
-import visualrobot.TurnCommand;
 
 public class CommandEditor extends JFrame implements ActionListener {
 	private ArrayList<CommandBlock> commands = new ArrayList<CommandBlock>();
@@ -69,8 +58,11 @@ public class CommandEditor extends JFrame implements ActionListener {
 					g2.draw(new Line2D.Double(j, (i+1)*this.getHeight()/(numThreads + 1) -10, j, (i+1)*this.getHeight()/(numThreads+1) + 10));
 			}
 
-			for(CommandBlock c:commands)
-				c.paint(g2);
+			int i = 0;
+			for(CommandBlock c:commands) {
+				c.paint(g2, i == selected);
+				i++;
+			}
 
 		}
 		
@@ -91,6 +83,10 @@ public class CommandEditor extends JFrame implements ActionListener {
 	private int xOffset;
 	private int yOffset;
 	private int focus = -1;
+	private int selected = -1;
+	
+	private CommandPanel cmdPanel = new CommandPanel();
+	private CommandSet cmdSet;
 	
 	private int snapGap = 30;
 	private int numThreads = 1;
@@ -98,7 +94,7 @@ public class CommandEditor extends JFrame implements ActionListener {
 	
 	private HandleThreadChange threadChangeList = new HandleThreadChange();
 	
-	public CommandEditor() {
+	public CommandEditor(CommandSet toLoad) {
 		
 		setLayout(new BorderLayout());
 		workAreaPane.setBackground(new Color(240, 240, 240));
@@ -131,8 +127,7 @@ public class CommandEditor extends JFrame implements ActionListener {
 //						commands.get(i).edit();
 						workArea.repaint();	
 						workArea.requestFocus();
-						workArea.setLocation(workArea.getX() + 5, workArea.getY() + 5);
-						workArea.setLocation(workArea.getX() - 5, workArea.getY() - 5);
+						selected = i;
 						return;
 					}
 					if(commands.get(i).getDelPortion().contains(e.getPoint())) {
@@ -168,6 +163,9 @@ public class CommandEditor extends JFrame implements ActionListener {
 						CommandBlock c = commands.get(i);
 						c.unsnap();
 						focus = i;
+						selected = i;
+						cmdPanel.changeType(c.getCommand().getClass());
+						
 						xOffset = e.getX() - r.x;
 						yOffset = e.getY() - r.y -1;//No idea why I had to add a -1
 						new Thread(new Move(c)).start();
@@ -180,8 +178,31 @@ public class CommandEditor extends JFrame implements ActionListener {
 
 		add(workAreaPane, BorderLayout.CENTER);
 		add(threadPanel, BorderLayout.WEST);
-		add(buttons, BorderLayout.SOUTH);
-
+		
+		JPanel bottom = new JPanel();
+		JScrollPane fields = new JScrollPane(cmdPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		bottom.setPreferredSize(new Dimension(0, 80));
+		
+		
+		bottom.setLayout(new BorderLayout());
+		bottom.add(buttons, BorderLayout.WEST);
+		bottom.add(fields, BorderLayout.EAST);
+		
+		
+		add(bottom, BorderLayout.SOUTH);
+		
+		
+		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		
+		if(toLoad != null) {
+			cmdSet = toLoad;
+			load(toLoad);
+		}
+		else {
+			cmdSet = new CommandSet();
+		}
+			
+		
 		validate();
 	}
 
@@ -195,7 +216,11 @@ public class CommandEditor extends JFrame implements ActionListener {
 				if(xtoswap > commands.get(i).getHitBox().x)
 					indexToPlace += 1;
 			commands.add(indexToPlace, temp);
+			if(f== selected)
+			selected = indexToPlace;
 		}
+		
+		
 		workArea.repaint();	
 
 	}
@@ -203,6 +228,8 @@ public class CommandEditor extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == newCommand) {
 			
+			
+			//Probably should happen only when a new class is loaded
 			Class<?>[] classes = { DelayCommand.class, WaitCommand.class,MotorCommand.class};
 			//add custom
 			
@@ -377,11 +404,67 @@ public class CommandEditor extends JFrame implements ActionListener {
 		return last;
 	}
 	
-	public static void main(String[] args) {
-		CommandEditor x = new CommandEditor();
-		x.pack();
-		x.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		x.setVisible(true);
+	public void load(CommandSet c) {
+		ArrayList<ArrayList<Command>> toLoad = c.getCommands();
+		
+		int snapNum = 0;
+		threadStarts = c.getThreadStarts();
+		numThreads = threadStarts.length;
+		txtThreadStarts = new JTextField[threadStarts.length];
 
+		
+		for(ArrayList<Command> thread : toLoad) {
+			
+			int i = 0;
+			for(Command command : thread) {
+				int y = (int) ((snapNum+1)* workArea.getHeight()/(numThreads+1) - 60);
+				System.out.println(y);
+				int x = threadStarts[snapNum] * 150 + 30 + i*150;
+				
+				CommandBlock toAdd = new CommandBlock(command, x, y, Color.WHITE, Color.BLACK);
+				toAdd.snap(snapNum);
+				commands.add(toAdd);
+				
+				
+			}
+			
+			txtThreadStarts[snapNum] = new JTextField(2);
+			txtThreadStarts[snapNum].setText(Integer.toString(threadStarts[snapNum]));
+			snapNum++;
+			
+		}
+		this.repaint();
+		
+		
 	}
+	
+	public void dispose() {
+		super.dispose();
+		
+		System.out.println("ASFDSD");
+		ArrayList<ArrayList<Command>> toExport = new ArrayList<ArrayList<Command>>();
+		
+		for(int i = 0; i < numThreads; i++) {
+
+			ArrayList<Command> program = new ArrayList<>();
+				for(CommandBlock c: commands)
+				if (c.getSnapped() == i)
+					program.add(c.getCommand());
+				
+			toExport.add(program);
+		}
+		
+		cmdSet.set(toExport, threadStarts);
+	
+			
+	}
+	
+//	
+//	public static void main(String[] args) {
+//		CommandEditor x = new CommandEditor(null);
+//		x.pack();
+//		x.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//		x.setVisible(true);
+//
+//	}
 }

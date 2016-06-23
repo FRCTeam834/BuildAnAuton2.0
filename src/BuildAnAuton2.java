@@ -54,10 +54,11 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		JButton add = new JButton("Add");
 		JButton add2 = new JButton("Add Curve");
 		JButton edit = new JButton("Edit");
+		JButton select = new JButton("Select");
 		JButton delete = new JButton("Delete");
 		JButton restart = new JButton("Restart");
-
-	JButton[] tools = {add, add2, edit, delete, restart};
+		
+	JButton[] tools = {add, add2, edit, select, delete, restart};
 		
 	JTextField prompt = new JTextField();
 	
@@ -69,10 +70,13 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		public JMenuItem load = new JMenuItem("Load");
 		public JMenuItem export = new JMenuItem("Export");
 
+	CommandEditor cmdEditor;
+		
 	public enum SelectedTool {
 		NONE,
 		ADD,
 		ADD2,
+		SELECT,
 		EDIT,
 		DEL;
 	}
@@ -89,6 +93,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 	HashMap<Integer, Boolean> keys = new HashMap<>();
 	
 	boolean[] backwards = new boolean[0];
+	CommandSet[] commands = new CommandSet[1];
+	
 	
 	double inchPerPixel = 0;
 	JScrollPane scrollPane = new JScrollPane();
@@ -169,7 +175,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 				if(type == 0) {
 					
 					g2.setColor(Color.GREEN);
-					if((tool == SelectedTool.EDIT || tool == SelectedTool.DEL) && p.getMousePosition() != null) {
+					if((tool == SelectedTool.EDIT || tool == SelectedTool.DEL || tool == SelectedTool.SELECT) && p.getMousePosition() != null) {
 						double temp = getScaledMousePosition().distance(coords[0], coords[1]);
 						
 						if(temp < minDistance){
@@ -189,7 +195,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 				for(int k = 0; k < type * 2; k+=2) {
 					g2.setColor(Color.BLUE);
 					g2.fill(new Ellipse2D.Double(coords[k]-5, coords[k+1]-5, 10, 10));
-					if((tool == SelectedTool.EDIT || tool == SelectedTool.DEL) && p.getMousePosition() != null) {
+					if((tool == SelectedTool.EDIT || tool == SelectedTool.DEL || tool == SelectedTool.SELECT) && p.getMousePosition() != null) {
 						double temp = getScaledMousePosition().distance(coords[k], coords[k+1]);
 						
 						if(temp < minDistance){
@@ -229,6 +235,11 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 			
 			if(minDistance < 20) {
 				g2.setColor(tool == SelectedTool.EDIT ? Color.CYAN: Color.RED);
+				
+				if (tool == SelectedTool.SELECT) {
+					g2.setColor(Color.ORANGE);
+				}
+				
 				g2.draw(new Ellipse2D.Double(selected.x-6, selected.y-6, 12, 12));
 			}
 			else if (!dragging){
@@ -288,6 +299,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		toolbar.add(add);
 		toolbar.add(add2);
 		toolbar.add(edit);
+		toolbar.add(select);
 		toolbar.add(delete);
 		toolbar.add(restart);
 				
@@ -398,6 +410,27 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 			});
 			t.start();
 		});
+		
+		select.addActionListener((ActionEvent e) -> {
+			for(JButton b: tools) {
+				b.setEnabled(true);
+			}
+			select.setEnabled(false);
+			Thread t = new Thread(() ->{
+				while(tool == SelectedTool.SELECT) {
+					p.repaint();
+					try {
+						Thread.sleep(20);
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+				}
+			});
+			t.start();
+			tool = SelectedTool.SELECT;
+
+		});
+		
 		delete.addActionListener((ActionEvent e) -> {
 			for(JButton b: tools) {
 				b.setEnabled(true);
@@ -421,6 +454,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 				b.setEnabled(true);
 			}
 			backwards = new boolean[0];
+			commands = new CommandSet[0];
 			tool = SelectedTool.NONE;
 			path.reset();
 			path.moveTo(field.getWidth()/2, field.getHeight()/2);
@@ -444,6 +478,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 			try {
 				ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 				oos.writeObject(backwards);
+				oos.writeObject(commands);
 				oos.writeObject(path);
 				oos.close();
 			} catch (Exception e1) {
@@ -459,6 +494,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 				System.out.println(file.getName());
 				ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
 				backwards = (boolean[]) ois.readObject();
+				commands = (CommandSet[]) ois.readObject();
 				path = (Path2D.Double) ois.readObject();
 				ois.close();
 				p.repaint();
@@ -486,6 +522,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		
 		
 		scrollPane.requestFocusInWindow();
+		
+		commands[0] = new CommandSet();
 		
 		JPanel top = new JPanel();
 		top.setLayout(new BorderLayout());
@@ -521,7 +559,11 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 			}		
 			
 			backwards = Arrays.copyOf(backwards, backwards.length+1);
+			commands = Arrays.copyOf(commands, commands.length+1);
+			
 			backwards[backwards.length-1] = keys.get(KeyEvent.VK_B);
+			commands[commands.length-1] = new CommandSet();
+			
 			p.repaint();
 		}
 		
@@ -551,6 +593,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 				
 				path.quadTo(ctrlX, ctrlY, temp.x, temp.y);
 				backwards = Arrays.copyOf(backwards, backwards.length+1);
+				commands = Arrays.copyOf(commands, backwards.length+1);
+
 				backwards[backwards.length-1] = keys.get(KeyEvent.VK_B);
 
 				addStep--;
@@ -572,6 +616,15 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 
 
 		}
+		
+		if(tool == SelectedTool.SELECT) {
+			if(cmdEditor != null)
+				cmdEditor.dispose();
+			cmdEditor = new CommandEditor(commands[curveSelected]);
+			cmdEditor.setVisible(true);
+			cmdEditor.pack();
+		}
+		
 		if(tool == SelectedTool.DEL && curveSelected > 0) {
 			double[] coords = new double[6];
 			
@@ -597,7 +650,6 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 				else {
 					tempPath.lineTo(coords[0], coords[1]);
 					tempBackwards[count] = backwards[i-1];
-
 					count++;
 				}
 
