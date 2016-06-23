@@ -17,6 +17,10 @@ public class MotorCommand implements Command{
 		motor.set(speed);
 	}
 
+	public MotorCommand() {
+		
+	}
+	
 	public MotorCommand(String n, double s) {
 		speed = s;
 		name = n;

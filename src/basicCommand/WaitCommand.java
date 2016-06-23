@@ -19,6 +19,10 @@ public class WaitCommand implements Command{
 		robot = r;
 	}
 	
+	public WaitCommand() {
+
+	}
+	
 	public WaitCommand(Condition<?> cond) {
 		condition = cond;
 		

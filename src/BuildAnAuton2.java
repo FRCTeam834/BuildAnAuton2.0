@@ -430,12 +430,12 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 
 
 		export.addActionListener((ActionEvent e) -> {		
-			double SPEED = java.lang.Double.parseDouble(JOptionPane.showInputDialog("Enter a speed between 0.0 and 1.0"));
+			double speed = java.lang.Double.parseDouble(JOptionPane.showInputDialog("Enter a speed between 0.0 and 1.0"));
 			
-			SPEED = SPEED > 1 ? 1.0 : SPEED; 
-			SPEED = SPEED <= 0 ? 0 : SPEED; 
+			speed = speed > 1 ? 1.0 : speed; 
+			speed = speed <= 0 ? 0 : speed; 
 
-			Export.export(Export.convertToCommands(path.getPathIterator(null), inchPerPixel, 0, SPEED, backwards, true));
+			Export.export(Export.convertToCommands(path.getPathIterator(null), inchPerPixel, 0, speed, backwards, true));
 
 		});
 		save.addActionListener((ActionEvent e)  -> {
@@ -495,7 +495,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 		
 		add(top, BorderLayout.NORTH);
 		add(scrollPane, BorderLayout.CENTER);
-		add(prompt, BorderLayout.SOUTH);
+//		add(prompt, BorderLayout.SOUTH);
 	}
 
 	public void mousePressed(MouseEvent e) {
