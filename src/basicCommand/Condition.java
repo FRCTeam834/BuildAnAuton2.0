@@ -6,6 +6,7 @@ import visualrobot.VisualRobot;
 
 import java.io.Serializable;
 
+import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 
@@ -79,6 +80,7 @@ public class Condition<T extends SensorBase> implements Serializable {
 		else if(DigitalInput.class.isInstance(sensor)) {
 			return "off: 0, on: 1";
 		}
+
 		else {
 			return "Idk";
 		}

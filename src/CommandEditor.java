@@ -418,7 +418,6 @@ public class CommandEditor extends JFrame implements ActionListener {
 			int i = 0;
 			for(Command command : thread) {
 				int y = (int) ((snapNum+1)* workArea.getHeight()/(numThreads+1) - 60);
-				System.out.println(y);
 				int x = threadStarts[snapNum] * 150 + 30 + i*150;
 				
 				CommandBlock toAdd = new CommandBlock(command, x, y, Color.WHITE, Color.BLACK);
@@ -441,7 +440,6 @@ public class CommandEditor extends JFrame implements ActionListener {
 	public void dispose() {
 		super.dispose();
 		
-		System.out.println("ASFDSD");
 		ArrayList<ArrayList<Command>> toExport = new ArrayList<ArrayList<Command>>();
 		
 		for(int i = 0; i < numThreads; i++) {
