@@ -46,6 +46,8 @@ import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import visualrobot.CommandSet;
+
 import java.net.URL;
 
 public class BuildAnAuton2 extends JFrame implements MouseListener{
@@ -222,6 +224,17 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 					g2.drawPolygon(xcoords, ycoords, 3);
 				}
 				
+				if(!commands[i].isEmpty()) {
+					g2.setColor(Color.ORANGE);
+
+					int k = type == 0 ? 0 : type * 2 - 2;
+
+					int[] xcoords = {(int)coords[k] -1, (int) coords[k], (int)coords[k] + 1};
+					int[] ycoords = {(int) (coords[k+1]-8), (int) (coords[k+1] -10), (int) (coords[k+1]-8)};
+					g2.drawPolygon(xcoords, ycoords, 3);
+
+
+				}
 				
 				i++;
 			}
@@ -469,7 +482,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 			speed = speed > 1 ? 1.0 : speed; 
 			speed = speed <= 0 ? 0 : speed; 
 
-			Export.export(Export.convertToCommands(path.getPathIterator(null), inchPerPixel, 0, speed, backwards, true));
+			Export exporter = new Export(path.getPathIterator(null), inchPerPixel, backwards, commands, true, speed);
+			exporter.export();
 
 		});
 		save.addActionListener((ActionEvent e)  -> {
@@ -617,12 +631,13 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 
 		}
 		
-		if(tool == SelectedTool.SELECT) {
+		if(tool == SelectedTool.SELECT && curveSelected >= 0) {
 			if(cmdEditor != null)
 				cmdEditor.dispose();
-			cmdEditor = new CommandEditor(commands[curveSelected]);
+			cmdEditor = new CommandEditor();
 			cmdEditor.setVisible(true);
 			cmdEditor.pack();
+			cmdEditor.load(commands[curveSelected]);
 		}
 		
 		if(tool == SelectedTool.DEL && curveSelected > 0) {

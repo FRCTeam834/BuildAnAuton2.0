@@ -1,7 +1,7 @@
+package visualrobot;
 import java.io.Serializable;
 import java.util.ArrayList;
-
-import visualrobot.Command;
+import java.util.Arrays;
 
 public class CommandSet implements Serializable {
 
@@ -16,10 +16,6 @@ public class CommandSet implements Serializable {
 		commands.add(new ArrayList<Command>());
 	}
 	
-	public boolean isEmpty() {
-		return commands.size() == 0;
-	}
-	
 	public ArrayList<ArrayList<Command>> getCommands() {
 		return commands;
 	}
@@ -28,6 +24,24 @@ public class CommandSet implements Serializable {
 		return threadStarts;
 	}
 	
+	public boolean isEmpty() {
+		return getSize() == 1 && getMain().isEmpty();
+	}
+	
+	public int getSize() {
+		return threadStarts.length;
+	}
+	
+	public void addThread(int start, ArrayList<Command> toAdd) {
+		threadStarts = Arrays.copyOf(threadStarts, threadStarts.length+1);
+		threadStarts[threadStarts.length-1] = start;
+		commands.add(toAdd);
+	}
+	
+	public void addToMain(Command toAdd) {
+		commands.get(0).add(toAdd);
+	}
+
 	public ArrayList<Command> getMain() {
 		return commands.get(0);
 	}
@@ -37,4 +51,16 @@ public class CommandSet implements Serializable {
 		this.threadStarts = threadStarts;
 	}
 	
+	public String toString() {
+		String str = "";
+		
+		for(int i = 0; i < getSize(); i++) {
+			str += (threadStarts[i] + ": ");
+			for(Command c: commands.get(i)) {
+				str += (c.getClass().getName() + " ") ;
+			}
+			str += '\n';
+		}
+		return str;
+	}
 }

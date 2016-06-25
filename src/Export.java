@@ -20,15 +20,33 @@ import basicCommand.MotorCommand;
 import basicCommand.WaitCommand;
 import edu.wpi.first.wpilibj.GyroBase;
 import visualrobot.Command;
+import visualrobot.CommandSet;
 import visualrobot.MoveAlongCurveCommand;
 import visualrobot.TurnCommand;
 import visualrobot.MoveStraightCommand;
 
 public class Export {
 	
+	CommandSet program = new CommandSet();
+	double inchPerPixel;
+	double speed;
+	boolean flatten;
+	boolean[] realBackwards;
+	CommandSet[] realCommands;
+	PathIterator realPath;
 	
-	public static ArrayList<Command> convertToCommands(PathIterator path, double inchPerPixel, double initialAngle, double speed, boolean[] backwards, boolean flatten) {
-		ArrayList<Command> toExport = new ArrayList<Command>();
+	int numInMain;
+	
+	public Export(PathIterator path, double iPP, boolean[] backwards, CommandSet[] commands, boolean f, double s) {
+		realPath = path;
+		inchPerPixel = iPP;
+		realBackwards = backwards;
+		realCommands = commands;
+		flatten = f;
+		speed = s;
+	}
+	
+	public void convertToCommands(PathIterator path, CommandSet[] commands, double initialAngle, boolean[] backwards) {
 		double[] coords = new double[6];
 		path.currentSegment(coords);
 		
@@ -39,14 +57,19 @@ public class Export {
 		double currY = 0;
 		double currAngle = 0;
 
+		if(commands!= null) {
+			program.getMain().addAll(commands[0].getMain());
+			for(int j = 1; j < commands[0].getSize(); j++ ){
+				program.addThread(0, commands[0].getCommands().get(j));
+			}
+		}
+		
 		path.next();
 		int i = 0;		
 
 		
 		for(; !path.isDone(); path.next()) {
 			int type = path.currentSegment(coords);
-			
-			
 			
 			switch(type) {
 			case 1:
@@ -75,11 +98,13 @@ public class Export {
 					}
 				}
 				
-				toExport.add(new TurnCommand(dAngle, speed));
-	
-				double distance = Math.sqrt(dX*dX+dY*dY) * inchPerPixel;
-				toExport.add(new MoveStraightCommand(distance, backwards[i] ? -speed : speed));
+				program.getMain().add(new TurnCommand(dAngle, speed));
+				numInMain++;
 				
+				double distance = Math.sqrt(dX*dX+dY*dY) * inchPerPixel;
+				program.getMain().add(new MoveStraightCommand(distance, backwards[i] ? -speed : speed));				
+				numInMain++;
+
 				System.out.println(dAngle+ " degrees, " + ((backwards[i] ? -1:1)*  distance) + " inches.");
 				lastX = currX;
 				lastY = currY;
@@ -89,36 +114,45 @@ public class Export {
 				if(flatten) {
 					QuadCurve2D.Double q = new QuadCurve2D.Double(lastX, lastY, coords[0], coords[1], coords[2], coords[3]);
 					if(backwards[i]) lastAngle += 180;
-					convertCurve2(toExport, q, lastAngle, speed, backwards[i], inchPerPixel);
+					convertCurve2(program.getMain(), q, lastAngle, speed, backwards[i], inchPerPixel);
 				}
 				else {
 					QuadCurveEquation q = new QuadCurveEquation(new QuadCurve2D.Double(lastX, lastY, coords[0], coords[1], coords[2], coords[3]));
 					if(backwards[i]) lastAngle += 180;
-					convertCurve(toExport, 0, q, lastAngle, speed, backwards[i], inchPerPixel);
+					convertCurve(program.getMain(), 0, q, lastAngle, speed, backwards[i], inchPerPixel);
 				}
 				break;
 			case 3:
 				break;
 			}
 			
+			if(commands!= null) {
+				System.out.println("AFSADFSD");
+				program.getMain().addAll(commands[i].getMain());
+				for(int j = 1; j < commands[i].getSize(); j++ ){
+					program.addThread(numInMain + commands[i].getThreadStarts()[j], 
+							commands[i].getCommands().get(j));
+				}
+			}
+			
 			i++;
+			
 		}
 		
-		return toExport;
 	}
 	
-	public static void export(ArrayList<Command> commands) {
+	public  void export() {
 		try {
+			convertToCommands(realPath, realCommands, 0, realBackwards);
 
 			File file = new File("auton.autr");
 			ObjectOutputStream oos = new ObjectOutputStream(
 									 new BufferedOutputStream(
 									 new FileOutputStream(file)));
 
-			oos.writeInt(1);
-			oos.writeInt(0);
-
-			oos.writeObject(commands);
+			oos.writeObject(program);
+			System.out.println(program);
+			
 			oos.close();
 
 			
@@ -153,7 +187,7 @@ public class Export {
 		}
 	}
 
-	private static double getCurrAngle(double dX, double dY, double lastAngle) {
+	private  double getCurrAngle(double dX, double dY, double lastAngle) {
 		double currAngle;
 		if(dX == 0) {
 			if(dY == 0){
@@ -176,7 +210,7 @@ public class Export {
 	/**
 	 * Converts to sectors
 	 */
-	private static void convertCurve(ArrayList<Command> commands, double start, CurveEquation curve, double lastAngle, double speed, boolean backwards, double inchPerPixel) {
+	private  void convertCurve(ArrayList<Command> commands, double start, CurveEquation curve, double lastAngle, double speed, boolean backwards, double inchPerPixel) {
 		double x = curve.getX(0);
 		double y = curve.getY(0);
 		double goal = 1.0;
@@ -261,6 +295,7 @@ public class Export {
 
 		commands.add(new TurnCommand(-AngleError, speed));
 		commands.add(new MoveAlongCurveCommand(radius * inchPerPixel,  backwards ? -speed : speed, -dTheta)); 
+		numInMain+=2;
 
 		System.out.println("Turning " + -AngleError + " Degrees");
 		System.out.println("Extent: " + dTheta + "\tRadius: " + radius * inchPerPixel);
@@ -275,7 +310,7 @@ public class Export {
 	/**
 	 * Converts to lines
 	 */
-	private static void convertCurve2(ArrayList<Command> commands, Shape curve, double lastAngle, double speed, boolean backwards, double inchPerPixel) {
+	private void convertCurve2(ArrayList<Command> commands, Shape curve, double lastAngle, double speed, boolean backwards, double inchPerPixel) {
 		PathIterator pi = curve.getPathIterator(null, 2);
 		
 		int count = -1;
@@ -287,11 +322,11 @@ public class Export {
 		
 		Arrays.fill(expandedBackwards, backwards);
 		
-		commands.addAll(convertToCommands(pi, inchPerPixel, lastAngle, speed, expandedBackwards ,false));
+		convertToCommands(pi, null, lastAngle, expandedBackwards);
 		
 	}
 	
-	private static Point2D.Double findCenter(double x1, double y1, double x2, double y2, double x3, double y3) {
+	private Point2D.Double findCenter(double x1, double y1, double x2, double y2, double x3, double y3) {
 		double midPoint1x = (x1+x2)/2;
 		double midPoint1y = (y1+y2)/2;
 		double midPoint2x = (x2+x3)/2;

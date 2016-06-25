@@ -27,6 +27,7 @@ import basicCommand.DelayCommand;
 import basicCommand.MotorCommand;
 import basicCommand.WaitCommand;
 import visualrobot.Command;
+import visualrobot.CommandSet;
 
 public class CommandEditor extends JFrame implements ActionListener {
 	private ArrayList<CommandBlock> commands = new ArrayList<CommandBlock>();
@@ -94,7 +95,7 @@ public class CommandEditor extends JFrame implements ActionListener {
 	
 	private HandleThreadChange threadChangeList = new HandleThreadChange();
 	
-	public CommandEditor(CommandSet toLoad) {
+	public CommandEditor() {
 		
 		setLayout(new BorderLayout());
 		workAreaPane.setBackground(new Color(240, 240, 240));
@@ -194,14 +195,7 @@ public class CommandEditor extends JFrame implements ActionListener {
 		
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		
-		if(toLoad != null) {
-			cmdSet = toLoad;
-			load(toLoad);
-		}
-		else {
-			cmdSet = new CommandSet();
-		}
-			
+
 		
 		validate();
 	}
@@ -270,6 +264,11 @@ public class CommandEditor extends JFrame implements ActionListener {
 		else if(e.getSource() == newThread) {
 			if(numThreads < 3) {
 				int tempStart = Integer.parseInt(JOptionPane.showInputDialog("Enter which command(Integer) to run with"));
+				
+				if(tempStart-1 >= getSizeOfMain()) {
+					tempStart = getSizeOfMain() + 1;
+				}
+
 				
 				numThreads += 1;
 				threadStarts = Arrays.copyOf(threadStarts, numThreads);
@@ -377,7 +376,11 @@ public class CommandEditor extends JFrame implements ActionListener {
 				JTextField temp = txtThreadStarts[i];
 				if(e.getSource().equals(temp)) {
 					int newStart = Integer.parseInt(temp.getText()) - 1;
+					if(newStart >= getSizeOfMain()) {
+						newStart = getSizeOfMain();
+					}
 					threadStarts[i] = newStart;
+					txtThreadStarts[i].setText(Integer.toString(newStart + 1));
 					workArea.repaint();
 				}
 			}
@@ -396,6 +399,16 @@ public class CommandEditor extends JFrame implements ActionListener {
 		return null;
 	}
 	
+	private int getSizeOfMain() {
+		int counter = 0;
+		for(CommandBlock c: commands)
+			if(c.getSnapped() == 0) {
+				counter++;
+			}
+		return counter;
+
+	}
+	
 	private CommandBlock getLastFromMain() {
 		CommandBlock last = null;
 		for(CommandBlock c: commands)
@@ -407,11 +420,16 @@ public class CommandEditor extends JFrame implements ActionListener {
 	public void load(CommandSet c) {
 		ArrayList<ArrayList<Command>> toLoad = c.getCommands();
 		
+		cmdSet = c;
+		
 		int snapNum = 0;
 		threadStarts = c.getThreadStarts();
 		numThreads = threadStarts.length;
 		txtThreadStarts = new JTextField[threadStarts.length];
 
+		threadPanel.setLayout(new GridLayout(numThreads , 1));
+
+		txtThreadStarts[0].setVisible(false);
 		
 		for(ArrayList<Command> thread : toLoad) {
 			
@@ -423,12 +441,13 @@ public class CommandEditor extends JFrame implements ActionListener {
 				CommandBlock toAdd = new CommandBlock(command, x, y, Color.WHITE, Color.BLACK);
 				toAdd.snap(snapNum);
 				commands.add(toAdd);
-				
+				i++;
 				
 			}
 			
 			txtThreadStarts[snapNum] = new JTextField(2);
 			txtThreadStarts[snapNum].setText(Integer.toString(threadStarts[snapNum]));
+			threadPanel.add(txtThreadStarts[snapNum]);
 			snapNum++;
 			
 		}

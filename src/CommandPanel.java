@@ -41,6 +41,7 @@ public class CommandPanel extends JPanel implements ActionListener {
 			for(Constructor c: constructors) {
 				if(!c.equals(noArguments)) {
 					cmdCont = c;
+					c.getAnnotatedExceptionTypes();
 				}
 			}
 			
