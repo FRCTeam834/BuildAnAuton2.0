@@ -276,8 +276,8 @@ public class CommandEditor extends JFrame implements ActionListener {
 				threadPanel.setLayout(new GridLayout(numThreads , 1));
 				txtThreadStarts[numThreads-1] = new JTextField(3);				
 				txtThreadStarts[numThreads-1].addActionListener(threadChangeList);
-				txtThreadStarts[numThreads-1].setText(Integer.toString(tempStart));
-				threadStarts[numThreads-1] = tempStart - 1;
+				 txtThreadStarts[numThreads-1].setText(Integer.toString(tempStart));
+		 		threadStarts[numThreads-1] = tempStart - 1;
 				threadPanel.add(txtThreadStarts[numThreads-1]);
 				
 				this.revalidate(); 
