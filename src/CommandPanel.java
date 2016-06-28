@@ -6,7 +6,9 @@ import java.lang.reflect.Parameter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.concurrent.locks.Condition;
 
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -58,11 +60,25 @@ public class CommandPanel extends JPanel implements ActionListener {
 				labels[i].setHorizontalAlignment(SwingConstants.RIGHT);
 				
 				types[i] = p.getType();
-				fields[i] = new JTextField(10);
 				
 				add(labels[i]);
-				add(fields[i]);
+
+				if(p.getType().equals(Condition.class)) {
+					add(new JComboBox<String>(new String[]{"Gyro", "Encoder", "Digital"}));
+					
+					
+				}
+				
+				else {
+					fields[i] = new JTextField(10);
+					
+					add(fields[i]);
+				}
 				i++;
+			}
+			
+			for(JTextField t: fields ) {
+				t.addActionListener(this);
 			}
 			
 			this.revalidate();
@@ -73,7 +89,6 @@ public class CommandPanel extends JPanel implements ActionListener {
 	}
 	
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
 		
 	}
 
