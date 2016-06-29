@@ -467,7 +467,9 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 				b.setEnabled(true);
 			}
 			backwards = new boolean[0];
-			commands = new CommandSet[0];
+			commands = new CommandSet[1];
+			commands[0] = new CommandSet();
+
 			tool = SelectedTool.NONE;
 			path.reset();
 			path.moveTo(field.getWidth()/2, field.getHeight()/2);
@@ -610,7 +612,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 				commands = Arrays.copyOf(commands, backwards.length+1);
 
 				backwards[backwards.length-1] = keys.get(KeyEvent.VK_B);
-
+				commands[commands.length-1] = new CommandSet();
+				
 				addStep--;
 				tool = SelectedTool.NONE;
 				add2.setEnabled(true);

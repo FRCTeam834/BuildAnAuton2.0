@@ -429,7 +429,6 @@ public class CommandEditor extends JFrame implements ActionListener {
 
 		threadPanel.setLayout(new GridLayout(numThreads , 1));
 
-		txtThreadStarts[0].setVisible(false);
 		
 		for(ArrayList<Command> thread : toLoad) {
 			
@@ -451,6 +450,8 @@ public class CommandEditor extends JFrame implements ActionListener {
 			snapNum++;
 			
 		}
+		txtThreadStarts[0].setVisible(false);
+
 		this.repaint();
 		
 		
