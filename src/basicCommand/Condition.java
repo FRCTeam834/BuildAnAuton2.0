@@ -86,4 +86,19 @@ public class Condition<T extends SensorBase> implements Serializable {
 		}
 	}
 	
+	public String[] getVals() {
+		String n = "";
+		if(Encoder.class.isInstance(sensor)) {
+			n = "Encoder";
+		}
+		else if(GyroBase.class.isInstance(sensor)) {
+			n = "Gyro";
+		}
+		else if(DigitalInput.class.isInstance(sensor)) {
+			n = "Digital";
+		}
+
+		return new String[]{n, name, Integer.toString(sign), Double.toString(amount)};
+	}
+	
 }

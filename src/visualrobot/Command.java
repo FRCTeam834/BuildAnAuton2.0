@@ -7,5 +7,6 @@ import java.io.Serializable;
  */
 public interface Command extends Serializable {
 	public abstract void execute() throws NullPointerException;
+	public abstract String[] getVals();
 	public void setRobot(VisualRobot r);
 }

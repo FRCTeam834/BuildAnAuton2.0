@@ -29,7 +29,12 @@ public class DelayCommand implements Command {
 	 * @param dir The direction in which to move.
 	 * @param r The robot.
 	 */
-	public DelayCommand(double time) {
+	public DelayCommand(Double time) {
 		this.time = time;
+	}
+
+	@Override
+	public String[] getVals() {
+		return new String[]{Double.toString(time)};
 	}
 }

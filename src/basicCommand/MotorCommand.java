@@ -21,13 +21,24 @@ public class MotorCommand implements Command{
 		
 	}
 	
-	public MotorCommand(String name, double speed) {
-		this.speed = speed;
+	public MotorCommand(String name, Double s) {
+		speed = s;
+		if(speed > 1) {
+			speed = 1;
+		}
+		if(speed < -1) {
+			speed = -1;
+		}
+
 		this.name = name;
 	}
 
 	public void setRobot(VisualRobot r) {
 		robot = r;
-		motor = r.getMotors().get(name);
+		motor = robot.getMotors().get(name);
+	}
+
+	public String[] getVals() {
+		return new String[] {name, Double.toString(speed)};
 	}
 }

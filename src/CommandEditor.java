@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Line2D;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -163,9 +164,24 @@ public class CommandEditor extends JFrame implements ActionListener {
 					if(r.contains(e.getPoint())) {
 						CommandBlock c = commands.get(i);
 						c.unsnap();
+						
+						Command toChange;
+						try {
+							toChange = cmdPanel.getCommand();
+							System.out.println(toChange.getClass().getName());
+
+							commands.get(selected).setCommand(toChange);
+
+						} 
+						catch (Exception ex){ex.printStackTrace();}
+						
 						focus = i;
 						selected = i;
+						
+						
 						cmdPanel.changeType(c.getCommand().getClass());
+						cmdPanel.load(commands.get(selected).getCommand());
+
 						
 						xOffset = e.getX() - r.x;
 						yOffset = e.getY() - r.y -1;//No idea why I had to add a -1
@@ -425,6 +441,8 @@ public class CommandEditor extends JFrame implements ActionListener {
 		int snapNum = 0;
 		threadStarts = c.getThreadStarts();
 		numThreads = threadStarts.length;
+		
+		threadPanel.removeAll();
 		txtThreadStarts = new JTextField[threadStarts.length];
 
 		threadPanel.setLayout(new GridLayout(numThreads , 1));
@@ -459,6 +477,14 @@ public class CommandEditor extends JFrame implements ActionListener {
 	
 	public void dispose() {
 		super.dispose();
+		
+		try {
+			commands.get(selected).setCommand(cmdPanel.getCommand());
+		} 
+		catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
+			e.printStackTrace();
+		}
 		
 		ArrayList<ArrayList<Command>> toExport = new ArrayList<ArrayList<Command>>();
 		

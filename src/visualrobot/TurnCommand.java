@@ -46,5 +46,11 @@ public class TurnCommand implements Command {
 		
 	}
 
+	@Override
+	public String[] getVals() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	
 }

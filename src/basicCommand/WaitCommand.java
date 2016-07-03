@@ -25,7 +25,15 @@ public class WaitCommand implements Command{
 	
 	public WaitCommand(Condition<?> cond) {
 		condition = cond;
+
 		
+	}
+
+	public String[] getVals() {
+		if(condition!=null)
+			return condition.getVals();
+		else 
+			return null;
 	}
 
 }

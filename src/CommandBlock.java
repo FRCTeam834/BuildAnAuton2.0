@@ -46,7 +46,6 @@ public class CommandBlock implements Serializable{
 		secCol = secondary;
 		hitbox = new Rectangle(0, 0, WIDTH, HEIGHT);
 		name = c.getClass().getName();
-
 		name = name.replace("basicCommand.", "");
 		
 	}
@@ -65,7 +64,7 @@ public class CommandBlock implements Serializable{
 		this(c, primary, secondary);
 		hitbox = new Rectangle(x, y, WIDTH, HEIGHT);
 	}
-	
+		
 	//Getters
 	public Rectangle getHitBox() {
 		return hitbox;	
@@ -87,6 +86,13 @@ public class CommandBlock implements Serializable{
 	public void setY(int y) {
 		hitbox.y = y;
 	}
+	
+	public void setCommand(Command c) {
+		name = c.getClass().getName();
+		name = name.replace("basicCommand.", "");
+		command = c;
+	}
+
 
 	//Returns the portions of the Rectangles that should implement unique actions when clicked on.
 	public Rectangle getDragPortion() {
