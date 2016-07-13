@@ -30,6 +30,11 @@ import basicCommand.WaitCommand;
 import visualrobot.Command;
 import visualrobot.CommandSet;
 
+/**
+ * Literally BuildAnAuton v1.0 shoved head first into this application
+ * @author Daniel Qian
+ *
+ */
 public class CommandEditor extends JFrame implements ActionListener {
 	private ArrayList<CommandBlock> commands = new ArrayList<CommandBlock>();
 	
@@ -129,7 +134,6 @@ public class CommandEditor extends JFrame implements ActionListener {
 //						commands.get(i).edit();
 						workArea.repaint();	
 						workArea.requestFocus();
-						selected = i;
 						return;
 					}
 					if(commands.get(i).getDelPortion().contains(e.getPoint())) {
@@ -137,6 +141,7 @@ public class CommandEditor extends JFrame implements ActionListener {
 							commands.remove(i);
 						workArea.repaint();	
 						return;
+						
 					}
 				
 				}
@@ -181,7 +186,6 @@ public class CommandEditor extends JFrame implements ActionListener {
 						
 						cmdPanel.changeType(c.getCommand().getClass());
 						cmdPanel.load(commands.get(selected).getCommand());
-
 						
 						xOffset = e.getX() - r.x;
 						yOffset = e.getY() - r.y -1;//No idea why I had to add a -1
@@ -210,10 +214,8 @@ public class CommandEditor extends JFrame implements ActionListener {
 		
 		
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		this.setSize(800, 500);
 		
-
-		
-		validate();
 	}
 
 	public void place(int f) {

@@ -1,4 +1,3 @@
-import java.awt.AWTException;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -12,9 +11,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Path2D;
-import java.awt.geom.Path2D.Double;
 import java.awt.geom.PathIterator;
-import java.awt.geom.Point2D;
 import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
@@ -26,7 +23,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -35,7 +31,6 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -50,7 +45,12 @@ import visualrobot.CommandSet;
 
 import java.net.URL;
 
-public class BuildAnAuton2 extends JFrame implements MouseListener{
+/**
+ * This is the main GUI for BuildAnAuton2.0. It displays the field, has save and load functionality etc.
+ * 
+ * @author Daniel Qian
+ */
+public class BuildAnAuton2 extends JFrame implements MouseListener {
 	
 	JToolBar toolbar = new JToolBar();
 		JButton add = new JButton("Add");
@@ -639,7 +639,6 @@ public class BuildAnAuton2 extends JFrame implements MouseListener{
 				cmdEditor.dispose();
 			cmdEditor = new CommandEditor();
 			cmdEditor.setVisible(true);
-			cmdEditor.pack();
 			cmdEditor.load(commands[curveSelected]);
 		}
 		

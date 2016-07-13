@@ -2,7 +2,9 @@ package visualrobot;
 
 import java.util.HashMap;
 
-import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.SampleRobot;
+import edu.wpi.first.wpilibj.SensorBase;
+import edu.wpi.first.wpilibj.SpeedController;
 
 public abstract class VisualRobot extends SampleRobot{
 	public abstract void setLeftSide(double speed);

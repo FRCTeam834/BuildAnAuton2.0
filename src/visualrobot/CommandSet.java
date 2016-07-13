@@ -57,10 +57,13 @@ public class CommandSet implements Serializable {
 		for(int i = 0; i < getSize(); i++) {
 			str += (threadStarts[i] + ": ");
 			for(Command c: commands.get(i)) {
-				str += (c.getClass().getName() + " ") ;
+				str += (c.getClass().getName() + c.toString() +"\n ") ;
+				
 			}
 			str += '\n';
 		}
 		return str;
+		
+
 	}
 }

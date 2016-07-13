@@ -2,8 +2,6 @@ package visualrobot;
 
 import java.util.ArrayList;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
 public class RunCommands implements Runnable {
 	private ArrayList<Command> commands = new ArrayList<Command>();
 	

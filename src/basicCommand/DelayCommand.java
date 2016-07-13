@@ -33,6 +33,10 @@ public class DelayCommand implements Command {
 		this.time = time;
 	}
 
+	public String toString() {
+		return Double.toString(time);
+	}
+	
 	@Override
 	public String[] getVals() {
 		return new String[]{Double.toString(time)};
