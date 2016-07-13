@@ -107,6 +107,7 @@ public class CommandPanel extends JPanel implements ActionListener {
 //			}
 //			
 			this.revalidate();
+			this.repaint();
 		} 
 		catch (NoSuchMethodException | SecurityException e) {
 			e.printStackTrace();

@@ -94,6 +94,7 @@ public class CommandEditor extends JFrame implements ActionListener {
 	
 	private CommandPanel cmdPanel = new CommandPanel();
 	private CommandSet cmdSet;
+	private JScrollPane fields;
 	
 	private int snapGap = 30;
 	private int numThreads = 1;
@@ -187,6 +188,8 @@ public class CommandEditor extends JFrame implements ActionListener {
 						cmdPanel.changeType(c.getCommand().getClass());
 						cmdPanel.load(commands.get(selected).getCommand());
 						
+						validatePanel();
+						
 						xOffset = e.getX() - r.x;
 						yOffset = e.getY() - r.y -1;//No idea why I had to add a -1
 						new Thread(new Move(c)).start();
@@ -201,7 +204,7 @@ public class CommandEditor extends JFrame implements ActionListener {
 		add(threadPanel, BorderLayout.WEST);
 		
 		JPanel bottom = new JPanel();
-		JScrollPane fields = new JScrollPane(cmdPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		fields = new JScrollPane(cmdPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		bottom.setPreferredSize(new Dimension(0, 80));
 		
 		
@@ -216,6 +219,10 @@ public class CommandEditor extends JFrame implements ActionListener {
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.setSize(800, 500);
 		
+	}
+	
+	public void validatePanel(){
+		this.validate();
 	}
 
 	public void place(int f) {
