@@ -174,7 +174,6 @@ public class CommandEditor extends JFrame implements ActionListener {
 						Command toChange;
 						try {
 							toChange = cmdPanel.getCommand();
-							System.out.println(toChange.getClass().getName());
 
 							commands.get(selected).setCommand(toChange);
 
