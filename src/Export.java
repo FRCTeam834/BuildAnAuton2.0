@@ -69,13 +69,6 @@ public class Export {
 
 		
 		for(; !path.isDone(); path.next()) {
-			if(commands!= null) {
-				program.getMain().addAll(commands[i].getMain());
-				for(int j = 1; j < commands[i].getSize(); j++ ){
-					program.addThread(numInMain + commands[i].getThreadStarts()[j], 
-							commands[i].getCommands().get(j));
-				}
-			}
 
 			int type = path.currentSegment(coords);
 			
@@ -133,9 +126,17 @@ public class Export {
 			case 3:
 				break;
 			}
-			
-			
 			i++;
+
+			if(commands!= null) {
+				program.getMain().addAll(commands[i].getMain());
+				for(int j = 1; j < commands[i].getSize(); j++ ){
+					program.addThread(numInMain + commands[i].getThreadStarts()[j], 
+							commands[i].getCommands().get(j));
+				}
+			}
+
+			
 			
 		}
 		
