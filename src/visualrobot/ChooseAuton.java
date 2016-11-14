@@ -7,11 +7,9 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import basicCommand.*;
 
 
-/*
- * This class reads the auton file. The Thread stuff is a planned feature, and doesn't do anything.
- */
 public class ChooseAuton {
 	CommandSet cmdSet = null;
 	ArrayList<ArrayList<Command>> threads;
@@ -25,13 +23,15 @@ public class ChooseAuton {
 	
 	public void chooseAuton(String fName) {
 		File file = new File("/home/lvuser/" + fName + ".autr"); //Select file
-
+		
 		try {
 		
 			ObjectInputStream ois;
 			ois = new ObjectInputStream(new FileInputStream(file));
 			
 			cmdSet = (CommandSet) ois.readObject();
+			
+			System.out.println("Commands Read");
 			
 			int numThreads = cmdSet.getSize();
 			threadStarts = cmdSet.getThreadStarts();
@@ -52,6 +52,8 @@ public class ChooseAuton {
 				
 		int i = 0;
 		while(robot.isAutonomous() && !robot.isDisabled() && i <= main.size()) {
+			System.out.println("Command " + i + " Running" );
+
 			try {
 				for(int start = 1; start < threadStarts.length; start++)
 					if (threadStarts[start] == i)
@@ -59,7 +61,7 @@ public class ChooseAuton {
 				if(i != main.size())
 					main.get(i).execute();
 			}
-			catch(NullPointerException e) {SmartDashboard.putString("DB/String 5", e.getLocalizedMessage());}
+			catch(NullPointerException e) {System.out.println(e.getLocalizedMessage());}
 			finally {
 				i++;
 			}

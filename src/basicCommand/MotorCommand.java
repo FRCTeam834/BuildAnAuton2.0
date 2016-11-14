@@ -14,6 +14,8 @@ public class MotorCommand implements Command{
 	private String name;
 	
 	public void execute() throws NullPointerException {
+		System.out.println(name + " " + (robot == null) + " " +( motor == null));
+
 		motor.set(speed);
 	}
 
