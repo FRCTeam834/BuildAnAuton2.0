@@ -481,7 +481,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 
 
 		export.addActionListener((ActionEvent e) -> {		
-			int 
+			double speed = java.lang.Double.parseDouble(JOptionPane.showInputDialog("Enter a speed between 0.0 and 1.0"));
 			
 			for(int i = 0; i < speeds.length; i++) {
 				speeds[i] = speed > 1 ? 1.0 : speed; 
