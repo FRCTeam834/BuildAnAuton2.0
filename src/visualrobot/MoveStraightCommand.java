@@ -56,7 +56,7 @@ public class MoveStraightCommand implements Command {
 			}
 			//If the gyro's angle is more than zero, change the left wheel's speed
 			else if(gyro.getAngle() > 0) {
-				lspeed -= Math.abs(gyro.getAngle()) * kP ;
+				lspeed -= Math.abs(gyro.getAngle()) * kP + accumulatedError * kI + changeInError * kD;
 			}
 			//Set the left and right wheel speeds.
 			robot.setLeftSide(lspeed);
