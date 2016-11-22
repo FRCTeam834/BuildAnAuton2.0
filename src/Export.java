@@ -27,9 +27,9 @@ import visualrobot.MoveStraightCommand;
 
 public class Export {
 	
-	CommandSet program = new CommandSet();
+	CommandSet program = new CommandSet(); 
 	double inchPerPixel;
-	double speed;
+	double[] speeds;
 	boolean flatten;
 	boolean[] realBackwards;
 	CommandSet[] realCommands;
@@ -37,13 +37,13 @@ public class Export {
 	
 	int numInMain;
 	
-	public Export(PathIterator path, double iPP, boolean[] backwards, CommandSet[] commands, boolean f, double s) {
+	public Export(PathIterator path, double iPP, boolean[] backwards, CommandSet[] commands, boolean f, double[] s) {
 		realPath = path;
 		inchPerPixel = iPP;
 		realBackwards = backwards;
 		realCommands = commands;
 		flatten = f;
-		speed = s;
+		speeds = s;
 	}
 	
 	public void convertToCommands(PathIterator path, CommandSet[] commands, double initialAngle, boolean[] backwards) {
@@ -99,11 +99,11 @@ public class Export {
 					}
 				}
 				
-				program.getMain().add(new TurnCommand(dAngle, speed));
+				program.getMain().add(new TurnCommand(dAngle, speeds[i]));
 				numInMain++;
 				
 				double distance = Math.sqrt(dX*dX+dY*dY) * inchPerPixel;
-				program.getMain().add(new MoveStraightCommand(distance, backwards[i] ? -speed : speed));				
+				program.getMain().add(new MoveStraightCommand(distance, backwards[i] ? -speeds[i] : speeds[i]));				
 				numInMain++;
 
 				System.out.println(dAngle+ " degrees, " + ((backwards[i] ? -1:1)*  distance) + " inches.");
@@ -115,12 +115,12 @@ public class Export {
 				if(flatten) {
 					QuadCurve2D.Double q = new QuadCurve2D.Double(lastX, lastY, coords[0], coords[1], coords[2], coords[3]);
 					if(backwards[i]) lastAngle += 180;
-					convertCurve2(program.getMain(), q, lastAngle, speed, backwards[i], inchPerPixel);
+					convertCurve2(program.getMain(), q, lastAngle, speeds[i], backwards[i], inchPerPixel);
 				}
 				else {
 					QuadCurveEquation q = new QuadCurveEquation(new QuadCurve2D.Double(lastX, lastY, coords[0], coords[1], coords[2], coords[3]));
 					if(backwards[i]) lastAngle += 180;
-					convertCurve(program.getMain(), 0, q, lastAngle, speed, backwards[i], inchPerPixel);
+					convertCurve(program.getMain(), 0, q, lastAngle, speeds[i], backwards[i], inchPerPixel);
 				}
 				break;
 			case 3:
@@ -144,7 +144,11 @@ public class Export {
 	
 	public  void export() {
 		try {
-			convertToCommands(realPath, realCommands, 0, realBackwards);
+						
+			double initialAngle = Double.parseDouble(JOptionPane.showInputDialog("Enter Initial Angle"));
+			
+			
+			convertToCommands(realPath, realCommands, initialAngle, realBackwards);
 
 			File file = new File("auton.autr");
 			ObjectOutputStream oos = new ObjectOutputStream(

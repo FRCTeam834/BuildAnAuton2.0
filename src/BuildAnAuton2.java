@@ -95,6 +95,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 	HashMap<Integer, Boolean> keys = new HashMap<>();
 	
 	boolean[] backwards = new boolean[0];
+	double[] speeds = new double[0];
 	CommandSet[] commands = new CommandSet[1];
 	
 	
@@ -467,6 +468,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				b.setEnabled(true);
 			}
 			backwards = new boolean[0];
+			speeds = new double[0];
 			commands = new CommandSet[1];
 			commands[0] = new CommandSet();
 
@@ -481,10 +483,12 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		export.addActionListener((ActionEvent e) -> {		
 			double speed = java.lang.Double.parseDouble(JOptionPane.showInputDialog("Enter a speed between 0.0 and 1.0"));
 			
-			speed = speed > 1 ? 1.0 : speed; 
-			speed = speed <= 0 ? 0 : speed; 
-
-			Export exporter = new Export(path.getPathIterator(null), inchPerPixel, backwards, commands, true, speed);
+			for(int i = 0; i < speeds.length; i++) {
+				speeds[i] = speed > 1 ? 1.0 : speed; 
+				speeds[i] = speed <= 0 ? 0 : speed; 
+			}
+			
+			Export exporter = new Export(path.getPathIterator(null), inchPerPixel, backwards, commands, true, speeds);
 			exporter.export();
 
 		});
@@ -494,6 +498,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			try {
 				ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 				oos.writeObject(backwards);
+				oos.writeObject(speeds);
 				oos.writeObject(commands);
 				oos.writeObject(path);
 				oos.close();
@@ -510,6 +515,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				System.out.println(file.getName());
 				ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
 				backwards = (boolean[]) ois.readObject();
+				speeds = (double[]) ois.readObject();
 				commands = (CommandSet[]) ois.readObject();
 				path = (Path2D.Double) ois.readObject();
 				ois.close();
@@ -575,6 +581,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			}		
 			
 			backwards = Arrays.copyOf(backwards, backwards.length+1);
+			speeds = Arrays.copyOf(speeds, speeds.length+1);
 			commands = Arrays.copyOf(commands, commands.length+1);
 			
 			backwards[backwards.length-1] = keys.get(KeyEvent.VK_B);
@@ -609,6 +616,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				
 				path.quadTo(ctrlX, ctrlY, temp.x, temp.y);
 				backwards = Arrays.copyOf(backwards, backwards.length+1);
+				speeds = Arrays.copyOf(speeds, speeds.length+1);
 				commands = Arrays.copyOf(commands, backwards.length+1);
 
 				backwards[backwards.length-1] = keys.get(KeyEvent.VK_B);
@@ -647,7 +655,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			
 			Path2D.Double tempPath = new Path2D.Double();
 			boolean[] tempBackwards = new boolean[backwards.length-1];
-			
+			double[] tempSpeeds = new double[speeds.length-1];
+
 			PathIterator pi = path.getPathIterator(null);
 			pi.currentSegment(coords);
 			tempPath.moveTo(coords[0], coords[1]);
@@ -667,6 +676,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				else {
 					tempPath.lineTo(coords[0], coords[1]);
 					tempBackwards[count] = backwards[i-1];
+					tempSpeeds[count] = speeds[i-1];
 					count++;
 				}
 
@@ -677,6 +687,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 
 			
 			backwards = tempBackwards;
+			speeds = tempSpeeds;
 			path = tempPath;
 			p.repaint();
 		}

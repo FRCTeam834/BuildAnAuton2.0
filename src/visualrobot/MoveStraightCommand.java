@@ -6,10 +6,13 @@ package visualrobot;
 
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.GyroBase;
+import edu.wpi.first.wpilibj.Timer;
 
 public class MoveStraightCommand implements Command {
 
 	private static final long serialVersionUID = -9199930939935475592L;
+	
+	private final double TIME_INTERVAL = .05;
 	
 	//Variable to represent the robot.
 	private VisualRobot robot;
@@ -19,31 +22,46 @@ public class MoveStraightCommand implements Command {
 	private GyroBase gyro;
 	
 	//The speed the robot should move, the distance it should travel, and a c factor value.
-	private double speed, distance, cFactor;
+	private double speed, distance;
+	private double kP, kI, kD; //PID Constants
 
 	public void execute() throws NullPointerException {
 		//Reset encoders and gyro.
 		REncoder.reset();
 		LEncoder.reset();
 		gyro.reset();
-		cFactor = Math.abs(speed / 25.0);
-
+		
+		kP = Math.abs(speed / 25.0);
+		kI = 0;
+		kD = 0;
+		
+		double accumulatedError = 0;
+		double lastAngle = gyro.getAngle();
+			
 		//While loop to end once the desired distance is travelled.
 		while(Math.abs(REncoder.getDistance() + LEncoder.getDistance()) / 2 < Math.abs(distance) && robot.isAutonomous() && !robot.isDisabled()) {
 			//Speed of left and right wheels.
 			double lspeed = speed, rspeed = speed;
+			
+			double angle = gyro.getAngle();
+			double changeInError = angle - lastAngle;
+
+			accumulatedError += angle; 
+			lastAngle = angle;
+			
+			
 			//If the gyro's angle is less than zero, change the right wheel's speed.
 			if(gyro.getAngle() < 0){
-				rspeed -= Math.abs(gyro.getAngle()) * cFactor;
+				rspeed -= Math.abs(gyro.getAngle()) * kP + accumulatedError * kI + changeInError * kD;
 			}
 			//If the gyro's angle is more than zero, change the left wheel's speed
 			else if(gyro.getAngle() > 0) {
-				lspeed -= Math.abs(gyro.getAngle()) * cFactor;
+				lspeed -= Math.abs(gyro.getAngle()) * kP ;
 			}
 			//Set the left and right wheel speeds.
 			robot.setLeftSide(lspeed);
 			robot.setRightSide(rspeed);
-
+			Timer.delay(TIME_INTERVAL);
 
 		}
 		robot.setLeftSide(0.0);
