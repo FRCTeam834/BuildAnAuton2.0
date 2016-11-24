@@ -1,9 +1,10 @@
 package basicCommand;
 
 import visualrobot.Command;
+import visualrobot.EditableCommand;
 import visualrobot.VisualRobot;
 
-public class WaitCommand implements Command{
+public class WaitCommand implements EditableCommand{
 	private static final long serialVersionUID = -7715889005108327668L;
 	Condition<?> condition;
 	VisualRobot robot;
@@ -29,6 +30,7 @@ public class WaitCommand implements Command{
 		
 	}
 
+	@Override
 	public String[] getVals() {
 		if(condition!=null)
 			return condition.getVals();

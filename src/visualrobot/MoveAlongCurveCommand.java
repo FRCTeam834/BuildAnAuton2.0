@@ -68,9 +68,4 @@ public class MoveAlongCurveCommand implements Command {
 		return false;
 	}
 
-
-	@Override
-	public String[] getVals() {
-		return null;
-	}
 }
