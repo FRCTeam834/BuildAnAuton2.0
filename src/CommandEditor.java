@@ -487,12 +487,14 @@ public class CommandEditor extends JFrame implements ActionListener {
 	public void dispose() {
 		super.dispose();
 		
-		try {
-			commands.get(selected).setCommand(cmdPanel.getCommand());
-		} 
-		catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-				| InvocationTargetException e) {
-			e.printStackTrace();
+		if(selected != -1) {
+			try {
+				commands.get(selected).setCommand(cmdPanel.getCommand());
+			} 
+			catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		ArrayList<ArrayList<Command>> toExport = new ArrayList<ArrayList<Command>>();
