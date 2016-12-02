@@ -3,9 +3,10 @@
 
 import edu.wpi.first.wpilibj.Timer;
 import visualrobot.Command;
+import visualrobot.EditableCommand;
 import visualrobot.VisualRobot;
 
-public class DelayCommand implements Command {	
+public class DelayCommand implements EditableCommand {	
 	private static final long serialVersionUID = 8254171449712480757L;
 	private double time;
 

@@ -91,9 +91,4 @@ public class MoveStraightCommand implements Command {
 		speed = s;
 	}
 
-	@Override
-	public String[] getVals() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

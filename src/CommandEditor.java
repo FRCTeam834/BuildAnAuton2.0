@@ -29,6 +29,7 @@ import basicCommand.MotorCommand;
 import basicCommand.WaitCommand;
 import visualrobot.Command;
 import visualrobot.CommandSet;
+import visualrobot.EditableCommand;
 
 /**
  * Literally BuildAnAuton v1.0 shoved head first into this application
@@ -185,7 +186,7 @@ public class CommandEditor extends JFrame implements ActionListener {
 						
 						
 						cmdPanel.changeType(c.getCommand().getClass());
-						cmdPanel.load(commands.get(selected).getCommand());
+						cmdPanel.load((EditableCommand) commands.get(selected).getCommand());
 						
 						validatePanel();
 						
@@ -486,12 +487,14 @@ public class CommandEditor extends JFrame implements ActionListener {
 	public void dispose() {
 		super.dispose();
 		
-		try {
-			commands.get(selected).setCommand(cmdPanel.getCommand());
-		} 
-		catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-				| InvocationTargetException e) {
-			e.printStackTrace();
+		if(selected != -1) {
+			try {
+				commands.get(selected).setCommand(cmdPanel.getCommand());
+			} 
+			catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		ArrayList<ArrayList<Command>> toExport = new ArrayList<ArrayList<Command>>();

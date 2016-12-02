@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.GyroBase;
 import visualrobot.Command;
+import visualrobot.EditableCommand;
 
 public class CommandPanel extends JPanel implements ActionListener {
 	
@@ -27,8 +28,8 @@ public class CommandPanel extends JPanel implements ActionListener {
 	private ArrayList<JComponent> fields = new ArrayList<>();
 	
 	private Class[] types;
-	private Class<? extends Command> command;
-	private Constructor<? extends Command> constructor;
+	private Class<? extends EditableCommand> command;
+	private Constructor<? extends EditableCommand> constructor;
 	
 	private String[] sensorsLabels = new String[]{"Gyro", "Encoder", "Digital"};
 	private Class[] sensorTypes = new Class[]{GyroBase.class, Encoder.class, DigitalInput.class};
@@ -116,7 +117,7 @@ public class CommandPanel extends JPanel implements ActionListener {
 		
 	}
 	
-	public void load(Command c) {
+	public void load(EditableCommand c) {
 		String[] vals = c.getVals();
 		
 		if(vals != null) {
@@ -141,7 +142,7 @@ public class CommandPanel extends JPanel implements ActionListener {
 		}
 	}
 	
-	public Command getCommand() throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public EditableCommand getCommand() throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		Object[] parameters = new Object[types.length];
 		
 		int i = 0;

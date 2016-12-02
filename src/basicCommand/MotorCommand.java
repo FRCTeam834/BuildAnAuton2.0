@@ -3,9 +3,10 @@ package basicCommand;
 import edu.wpi.first.wpilibj.SpeedController;
 
 import visualrobot.Command;
+import visualrobot.EditableCommand;
 import visualrobot.VisualRobot;
 
-public class MotorCommand implements Command{
+public class MotorCommand implements EditableCommand{
 	private static final long serialVersionUID = -3786831076020284885L;
 	
 	private VisualRobot robot;

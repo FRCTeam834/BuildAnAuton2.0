@@ -1,4 +1,4 @@
-	package visualrobot;
+package visualrobot;
 
 import edu.wpi.first.wpilibj.GyroBase;
 
@@ -44,12 +44,6 @@ public class TurnCommand implements Command {
 		else
 			speed = s;
 		
-	}
-
-	@Override
-	public String[] getVals() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	
