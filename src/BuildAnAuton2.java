@@ -311,7 +311,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		scrollPane.addMouseListener(this);
 		
 		toolbar.add(add);
-		toolbar.add(add2);
+		//Disabled because curves aren't accurate.
+//		toolbar.add(add2);
 		toolbar.add(edit);
 		toolbar.add(select);
 		toolbar.add(delete);
