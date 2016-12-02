@@ -31,7 +31,7 @@ public class Export {
 	double inchPerPixel; //Conversion ratio from pixels to inches 
 	double[] speeds; //
 	boolean flatten; // Whether to approximate curves to lines, or use arcs
-	boolean[] realBackwards; //
+	boolean[] realBackwards;
 	CommandSet[] realCommands;
 	PathIterator realPath;
 	
