@@ -27,11 +27,11 @@ import visualrobot.MoveStraightCommand;
 
 public class Export {
 	
-	CommandSet program = new CommandSet(); 
-	double inchPerPixel;
-	double[] speeds;
-	boolean flatten;
-	boolean[] realBackwards;
+	CommandSet program = new CommandSet(); //The program to be exported
+	double inchPerPixel; //Conversion ratio from pixels to inches 
+	double[] speeds; //
+	boolean flatten; // Whether to approximate curves to lines, or use arcs
+	boolean[] realBackwards; //
 	CommandSet[] realCommands;
 	PathIterator realPath;
 	
@@ -142,6 +142,9 @@ public class Export {
 		
 	}
 	
+	/**
+	 * Sends the program to the robot to be used
+	 */
 	public  void export() {
 		try {
 						
@@ -192,6 +195,9 @@ public class Export {
 		}
 	}
 
+	/**
+	 * Calculates the angle based on change in x and y
+	 */
 	private  double getCurrAngle(double dX, double dY, double lastAngle) {
 		double currAngle;
 		if(dX == 0) {
