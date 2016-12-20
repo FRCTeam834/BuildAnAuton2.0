@@ -79,6 +79,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		public JMenuItem save = new JMenuItem("Save");
 		public JMenuItem load = new JMenuItem("Load");
 		public JMenuItem export = new JMenuItem("Export");
+	JMenu settings = new JMenu("Settings");
+		public JMenuItem setDefaultSpeed = new JMenuItem("Set Default Speed");
 
 	CommandEditor cmdEditor;
 		
@@ -389,6 +391,9 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		file.add(export);
 		menu.add(file);
 		
+		settings.add(setDefaultSpeed);
+		menu.add(settings);
+		
 		this.setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
 		
 		fs.setFileFilter(new FileNameExtensionFilter("Auton", "aut"));
@@ -615,6 +620,20 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			}
 		});
 		
+		setDefaultSpeed.addActionListener((ActionEvent e)  -> {
+			String input = JOptionPane.showInputDialog(null, "Default Speed (-1 to 1): ", defaultSpeed);
+			if(input == null || input == "") return;
+			double val = Double.parseDouble(input);
+			if(val < -1.0) val = -1.0;
+			else if(val > 1.0) val = 1.0;
+			
+			for(int i = 0; i < speeds.size(); i++)
+				if(speeds.get(i) == defaultSpeed)
+					speeds.set(i, val);
+			
+			defaultSpeed = val;
+		});
+		
 		for(JButton b: tools) {
 			b.setFocusPainted(false);
 			b.setFocusable(false);
@@ -786,9 +805,13 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		}
 		else if(tool == SelectedTool.SPEED && selectedLineIndex != -1 && linesSelected > 0)
 		{
-			String input = JOptionPane.showInputDialog(null, "Speed: ", speeds.get(selectedLineIndex));
+			String input = JOptionPane.showInputDialog(null, "Speed (-1 to 1): ", speeds.get(selectedLineIndex));
 			if(input == null || input == "") return;
-			speeds.set(selectedLineIndex, Double.parseDouble(input));
+			double val = Double.parseDouble(input);
+			if(val < -1.0) val = -1.0;
+			else if(val > 1.0) val = 1.0;
+			
+			speeds.set(selectedLineIndex, val);
 		}
 	}
 	
