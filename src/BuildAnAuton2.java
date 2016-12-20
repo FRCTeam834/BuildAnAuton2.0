@@ -1,10 +1,13 @@
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dialog;
+import java.awt.Dialog.ModalExclusionType;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -30,6 +33,7 @@ import java.util.HashMap;
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -41,6 +45,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 import visualrobot.CommandSet;
 
@@ -87,6 +93,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 	}
 	SelectedTool tool = SelectedTool.NONE;
 	
+	double defaultSpeed = 0.5;
+	
 	boolean dragging = false;
 	
 	int addStep = 0;
@@ -98,7 +106,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 	HashMap<Integer, Boolean> keys = new HashMap<>();
 	
 	boolean[] backwards = new boolean[0];
-	double[] speeds = new double[0];
+	ArrayList<Double> speeds = new ArrayList<Double>();
 	CommandSet[] commands = new CommandSet[1];
 	
 	
@@ -107,9 +115,16 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 
 	public double zoom = 1;
 	
+	int selectedLineIndex = -1, linesSelected = 0;
+	
 	JComponent p = new JComponent() {
 		public void paintComponent(Graphics g) {
 			Graphics2D g2 = (Graphics2D) g;
+			
+			g2.setRenderingHint(
+			        RenderingHints.KEY_ANTIALIASING,
+			        RenderingHints.VALUE_ANTIALIAS_ON);
+			
 			g2.setColor(Color.BLACK);
 			g2.setStroke(new BasicStroke(3));
 			
@@ -120,7 +135,6 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			}
 			g2.drawImage(field, 0, 0, null);
 			g2.draw(path);
-			
 			
 			
 			if(tool == SelectedTool.ADD && p.getMousePosition() != null) {
@@ -169,12 +183,10 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			int j = 0;
 			boolean done = false;
 			
-			
 			double minDistance = 20;
 			Point selected = new Point(0,0), lineEndSelected = new Point(0, 0);
 			
-			
-						
+			linesSelected = 0;
 			for(; !pi.isDone() && !done; pi.next()) {
 				int type = pi.currentSegment(coords);
 
@@ -230,6 +242,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 						
 						double ldist = Integer.MAX_VALUE;
 						Point[] lpts = new Point[0];
+						int sidx = -1;
 					    for(int l = 0; l < pathPts.size() - 1; l++)
 					    {
 					    	double d = LineMath.DistanceToLine(getScaledMousePosition(), pathPts.get(l), pathPts.get(l + 1));
@@ -237,6 +250,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 					    	{
 					    		ldist = d;
 					    		lpts = new Point[]{pathPts.get(l), pathPts.get(l + 1)};
+					    		sidx = l;
 					    	}
 					    }
 					    
@@ -257,6 +271,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 					    	lineEndSelected = lpts[1];
 					    	g2.setColor(Color.ORANGE);
 							g2.drawLine(selected.x, selected.y, lineEndSelected.x, lineEndSelected.y);
+							selectedLineIndex = sidx;
+							linesSelected++;
 					    }
 					    //todo: make speeds into an arraylist and add/remove from it upon pt add/remove
 					    //also make clicking on lines work
@@ -373,7 +389,11 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		file.add(export);
 		menu.add(file);
 		
+		this.setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
+		
 		fs.setFileFilter(new FileNameExtensionFilter("Auton", "aut"));
+		
+		speeds.add(defaultSpeed);
 		
 		add.addActionListener((ActionEvent e) -> {
 			for(JButton b: tools) {
@@ -519,7 +539,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				b.setEnabled(true);
 			}
 			backwards = new boolean[0];
-			speeds = new double[0];
+			speeds = new ArrayList<Double>();
 			commands = new CommandSet[1];
 			commands[0] = new CommandSet();
 
@@ -550,14 +570,14 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 
 
 		export.addActionListener((ActionEvent e) -> {		
-			double speed = java.lang.Double.parseDouble(JOptionPane.showInputDialog("Enter a speed between 0.0 and 1.0"));
+			/*double speed = java.lang.Double.parseDouble(JOptionPane.showInputDialog("Enter a speed between 0.0 and 1.0"));
 			
-			for(int i = 0; i < speeds.length; i++) {
-				speeds[i] = speed > 1 ? 1.0 : speed; 
-				speeds[i] = speed <= 0 ? 0 : speed; 
-			}
+			for(int i = 0; i < speeds.size(); i++) {
+				speeds.set(i, speed > 1 ? 1.0 : speed); 
+				speeds.set(i, speed <= 0 ? 0 : speed); 
+			}*/
 			
-			Export exporter = new Export(path.getPathIterator(null), inchPerPixel, backwards, commands, true, speeds);
+			Export exporter = new Export(path.getPathIterator(null), inchPerPixel, backwards, commands, true, speeds.toArray(new Double[0]));
 			exporter.export();
 
 		});
@@ -584,7 +604,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				System.out.println(file.getName());
 				ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
 				backwards = (boolean[]) ois.readObject();
-				speeds = (double[]) ois.readObject();
+				speeds = (ArrayList<Double>) ois.readObject();
 				commands = (CommandSet[]) ois.readObject();
 				path = (Path2D.Double) ois.readObject();
 				ois.close();
@@ -626,7 +646,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		add(scrollPane, BorderLayout.CENTER);
 //		add(prompt, BorderLayout.SOUTH);
 	}
-
+	
 	public void mousePressed(MouseEvent e) {
 		if(tool == SelectedTool.ADD) {
 
@@ -643,14 +663,16 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 					path.lineTo(pX, mouseY);
 
 				}
+				speeds.add(defaultSpeed);
 
 			}
 			else {					
 				path.lineTo(getScaledMousePosition().x, getScaledMousePosition().y);
+				speeds.add(defaultSpeed);
 			}		
 			
 			backwards = Arrays.copyOf(backwards, backwards.length+1);
-			speeds = Arrays.copyOf(speeds, speeds.length+1);
+			//speeds = Arrays.copyOf(speeds, speeds.size()+1);
 			commands = Arrays.copyOf(commands, commands.length+1);
 			
 			backwards[backwards.length-1] = keys.get(KeyEvent.VK_B);
@@ -659,7 +681,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			p.repaint();
 		}
 		
-		if(tool == SelectedTool.ADD2) {
+		else if(tool == SelectedTool.ADD2) {
 			if(addStep == 2) {
 				temp = getScaledMousePosition();
 				
@@ -685,7 +707,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				
 				path.quadTo(ctrlX, ctrlY, temp.x, temp.y);
 				backwards = Arrays.copyOf(backwards, backwards.length+1);
-				speeds = Arrays.copyOf(speeds, speeds.length+1);
+				//speeds = Arrays.copyOf(speeds, speeds.length+1);
 				commands = Arrays.copyOf(commands, backwards.length+1);
 
 				backwards[backwards.length-1] = keys.get(KeyEvent.VK_B);
@@ -698,7 +720,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			}
 			p.repaint();
 		}
-		if(tool == SelectedTool.EDIT) {
+		else if(tool == SelectedTool.EDIT) {
 			
 			if(keys.get(KeyEvent.VK_B) && curveSelected != backwards.length && curveSelected != -1) {
 				backwards[curveSelected] = !backwards[curveSelected];
@@ -711,7 +733,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 
 		}
 		
-		if(tool == SelectedTool.SELECT && curveSelected >= 0) {
+		else if(tool == SelectedTool.SELECT && curveSelected >= 0) {
 			if(cmdEditor != null)
 				cmdEditor.dispose();
 			cmdEditor = new CommandEditor();
@@ -719,12 +741,12 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			cmdEditor.load(commands[curveSelected]);
 		}
 		
-		if(tool == SelectedTool.DEL && curveSelected > 0) {
+		else if(tool == SelectedTool.DEL && curveSelected > 0) {
 			double[] coords = new double[6];
 			
 			Path2D.Double tempPath = new Path2D.Double();
 			boolean[] tempBackwards = new boolean[backwards.length-1];
-			double[] tempSpeeds = new double[speeds.length-1];
+			double[] tempSpeeds = new double[speeds.size()-1];
 
 			PathIterator pi = path.getPathIterator(null);
 			pi.currentSegment(coords);
@@ -745,7 +767,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				else {
 					tempPath.lineTo(coords[0], coords[1]);
 					tempBackwards[count] = backwards[i-1];
-					tempSpeeds[count] = speeds[i-1];
+					tempSpeeds[count] = speeds.get(i - 1);
 					count++;
 				}
 
@@ -756,9 +778,17 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 
 			
 			backwards = tempBackwards;
-			speeds = tempSpeeds;
+			speeds = new ArrayList<Double>();
+			for(int l = 0; l < tempSpeeds.length; l++)
+				speeds.add(tempSpeeds[l]);
 			path = tempPath;
 			p.repaint();
+		}
+		else if(tool == SelectedTool.SPEED && selectedLineIndex != -1 && linesSelected > 0)
+		{
+			String input = JOptionPane.showInputDialog(null, "Speed: ", speeds.get(selectedLineIndex));
+			if(input == null || input == "") return;
+			speeds.set(selectedLineIndex, Double.parseDouble(input));
 		}
 	}
 	
@@ -803,8 +833,13 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 	}
 	
 	private Point getScaledMousePosition() {
-		int x = p.getMousePosition().x;
-		int y = p.getMousePosition().y;
+		int x = 0, y = 0;
+		try
+		{
+			x = p.getMousePosition().x;
+			y = p.getMousePosition().y;
+		}
+		catch (Exception e) { return new Point(x, y); }
 		
 		if(zoom < 1) {
 		x += ((zoom - 1) * field.getWidth())/2;

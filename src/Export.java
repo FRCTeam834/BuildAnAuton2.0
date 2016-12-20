@@ -29,7 +29,7 @@ public class Export {
 	
 	CommandSet program = new CommandSet(); //The program to be exported
 	double inchPerPixel; //Conversion ratio from pixels to inches 
-	double[] speeds; //
+	Double[] speeds; //
 	boolean flatten; // Whether to approximate curves to lines, or use arcs
 	boolean[] realBackwards;
 	CommandSet[] realCommands;
@@ -37,7 +37,7 @@ public class Export {
 	
 	int numInMain;
 	
-	public Export(PathIterator path, double iPP, boolean[] backwards, CommandSet[] commands, boolean f, double[] s) {
+	public Export(PathIterator path, double iPP, boolean[] backwards, CommandSet[] commands, boolean f, Double[] s) {
 		realPath = path;
 		inchPerPixel = iPP;
 		realBackwards = backwards;
