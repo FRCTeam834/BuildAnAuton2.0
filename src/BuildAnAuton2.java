@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -59,8 +60,9 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		JButton select = new JButton("Select");
 		JButton delete = new JButton("Delete");
 		JButton restart = new JButton("Restart");
+		JButton speed = new JButton("Speed");
 		
-	JButton[] tools = {add, add2, edit, select, delete, restart};
+	JButton[] tools = {add, add2, edit, select, delete, restart, speed};
 		
 	JTextField prompt = new JTextField();
 	
@@ -80,7 +82,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		ADD2,
 		SELECT,
 		EDIT,
-		DEL;
+		DEL,
+		SPEED;
 	}
 	SelectedTool tool = SelectedTool.NONE;
 	
@@ -168,7 +171,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			
 			
 			double minDistance = 20;
-			Point selected = new Point(0,0);
+			Point selected = new Point(0,0), lineEndSelected = new Point(0, 0);
 			
 			
 						
@@ -199,6 +202,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 					g2.setColor(Color.BLUE);
 					g2.fill(new Ellipse2D.Double(coords[k]-5, coords[k+1]-5, 10, 10));
 					if((tool == SelectedTool.EDIT || tool == SelectedTool.DEL || tool == SelectedTool.SELECT) && p.getMousePosition() != null) {
+
+						
 						double temp = getScaledMousePosition().distance(coords[k], coords[k+1]);
 						
 						if(temp < minDistance){
@@ -211,6 +216,50 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 							selected = new Point((int) coords[k], (int)coords[k+1]);
 						}
 					
+					}
+					else if(tool == SelectedTool.SPEED && p.getMousePosition() != null)
+					{
+						double[] cyeet = new double[6];
+						ArrayList<Point> pathPts = new ArrayList<Point>();
+						for(PathIterator glagla = path.getPathIterator(null); !glagla.isDone(); glagla.next())
+						{
+							int t = glagla.currentSegment(cyeet);
+							if(cyeet[0] == 0 && cyeet[1] == 0) continue;
+							pathPts.add(new Point((int)cyeet[0], (int)cyeet[1]));
+						}
+						
+						double ldist = Integer.MAX_VALUE;
+						Point[] lpts = new Point[0];
+					    for(int l = 0; l < pathPts.size() - 1; l++)
+					    {
+					    	double d = LineMath.DistanceToLine(getScaledMousePosition(), pathPts.get(l), pathPts.get(l + 1));
+					    	if(d < ldist)
+					    	{
+					    		ldist = d;
+					    		lpts = new Point[]{pathPts.get(l), pathPts.get(l + 1)};
+					    	}
+					    }
+					    
+					    double lang = LineMath.Angle(lpts[0], lpts[1]),
+					    		lang2 = LineMath.Angle(lpts[1], lpts[0]),
+					    		mang = LineMath.Angle(lpts[0], getScaledMousePosition()),
+					    		mang2 = LineMath.Angle(lpts[1], getScaledMousePosition());
+					
+					    if(ldist < minDistance && 
+					    		lang - mang <= 40.0 && 
+					    		lang - mang >= -40.0 &&
+					    		lang2 - mang2 <= 40.0 &&
+					    		lang2 - mang2 >= -40.0
+					    		)
+					    {
+					    	minDistance = ldist;
+					    	selected = lpts[0];
+					    	lineEndSelected = lpts[1];
+					    	g2.setColor(Color.ORANGE);
+							g2.drawLine(selected.x, selected.y, lineEndSelected.x, lineEndSelected.y);
+					    }
+					    //todo: make speeds into an arraylist and add/remove from it upon pt add/remove
+					    //also make clicking on lines work
 					}
 					j++;
 				}
@@ -317,6 +366,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		toolbar.add(select);
 		toolbar.add(delete);
 		toolbar.add(restart);
+		toolbar.add(speed);
 				
 		file.add(save);
 		file.add(load);
@@ -478,6 +528,24 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			path.moveTo(field.getWidth()/2, field.getHeight()/2);
 			p.repaint();
 			
+		});
+		speed.addActionListener((ActionEvent e) -> {
+			for(JButton b: tools) {
+				b.setEnabled(true);
+			}
+			speed.setEnabled(false);
+			Thread t = new Thread(() ->{
+				while(tool == SelectedTool.SPEED) {
+					p.repaint();
+					try {
+						Thread.sleep(20);
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+				}
+			});
+			t.start();
+			tool = SelectedTool.SPEED;
 		});
 
 
