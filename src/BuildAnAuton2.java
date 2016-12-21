@@ -105,6 +105,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 	int curveSelected = -1;
 	int pointSelected = -1;
 	
+	double addAngle, addDistance;
+	
 	HashMap<Integer, Boolean> keys = new HashMap<>();
 	
 	boolean[] backwards = new boolean[0];
@@ -150,15 +152,27 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 					double angle = Math.atan2(mouseY-pY, mouseX-pX)*180.0/Math.PI;
 					if(angle < 45 && angle > -45 || angle >135 ||angle < -135) {
 						g2.drawLine(pX, pY, mouseX, pY);
+						addAngle = LineMath.Angle(new Point(pX, pY), new Point(mouseX, pY));
+						addDistance = new Point(pX, pY).distance(new Point(mouseX, pY)) * inchPerPixel;
 					}
 					else if( (angle >= 45 && angle <= 135) ||(angle >= -135 && angle <=-45)) {
 						g2.drawLine(pX, pY, pX, mouseY);
-
+						addAngle = LineMath.Angle(new Point(pX, pY), new Point(pX, mouseY));
+						addDistance = new Point(pX, pY).distance(new Point(pX, mouseY)) * inchPerPixel;
 					}
 				}
 				else {					
 					g2.drawLine((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(), getScaledMousePosition().x, getScaledMousePosition().y);			
+					addAngle = LineMath.Angle(new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()), new Point(getScaledMousePosition().x, getScaledMousePosition().y));
+					addDistance = new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()).distance(new Point(getScaledMousePosition().x, getScaledMousePosition().y)) * inchPerPixel;
 				}
+				
+				addAngle = Math.round(addAngle * 100.0) / 100.0;
+				if(addAngle < 0) addAngle += 360;
+				addDistance = Math.round(addDistance * 100.0) / 100.0;
+				
+				g2.drawString("Angle: " + addAngle + "°", 10, this.getHeight() - 25);
+				g2.drawString("Distance: " + addDistance + " in", 10, this.getHeight() - 10);
 			}
 			
 			if(tool == SelectedTool.ADD2 && p.getMousePosition() != null) {
@@ -213,8 +227,6 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				}
 				
 				for(int k = 0; k < type * 2; k+=2) {
-					g2.setColor(Color.BLUE);
-					g2.fill(new Ellipse2D.Double(coords[k]-5, coords[k+1]-5, 10, 10));
 					if((tool == SelectedTool.EDIT || tool == SelectedTool.DEL || tool == SelectedTool.SELECT) && p.getMousePosition() != null) {
 
 						
@@ -276,9 +288,9 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 							selectedLineIndex = sidx;
 							linesSelected++;
 					    }
-					    //todo: make speeds into an arraylist and add/remove from it upon pt add/remove
-					    //also make clicking on lines work
 					}
+					g2.setColor(Color.BLUE);
+					g2.fill(new Ellipse2D.Double(coords[k]-5, coords[k+1]-5, 10, 10));
 					j++;
 				}
 				
