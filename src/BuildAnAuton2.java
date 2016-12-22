@@ -32,6 +32,7 @@ import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -81,6 +82,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		public JMenuItem export = new JMenuItem("Export");
 	JMenu settings = new JMenu("Settings");
 		public JMenuItem setDefaultSpeed = new JMenuItem("Set Default Speed");
+		public JCheckBoxMenuItem snapToPoints = new JCheckBoxMenuItem("Snap to Existing Points");
 
 	CommandEditor cmdEditor;
 		
@@ -210,32 +212,41 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				}
 				else
 				{		
-					double[] cyeet = new double[6];
-					ArrayList<Point> pathPts = new ArrayList<Point>();
-					int idx = -1;
-					double dist = 20;
-					for(PathIterator glagla = path.getPathIterator(null); !glagla.isDone(); glagla.next())
+					if(snapToPoints.getState())
 					{
-						int t = glagla.currentSegment(cyeet);
-						if(cyeet[0] == 0 && cyeet[1] == 0) continue;
-						pathPts.add(new Point((int)cyeet[0], (int)cyeet[1]));
-						if(new Point((int)cyeet[0], (int)cyeet[1]).distance(getScaledMousePosition()) <= dist)
+						double[] cyeet = new double[6];
+						ArrayList<Point> pathPts = new ArrayList<Point>();
+						int idx = -1;
+						double dist = 20;
+						for(PathIterator glagla = path.getPathIterator(null); !glagla.isDone(); glagla.next())
 						{
-							idx = pathPts.size() - 1;
-							dist = new Point((int)cyeet[0], (int)cyeet[1]).distance(getScaledMousePosition());
+							int t = glagla.currentSegment(cyeet);
+							if(cyeet[0] == 0 && cyeet[1] == 0) continue;
+							pathPts.add(new Point((int)cyeet[0], (int)cyeet[1]));
+							if(new Point((int)cyeet[0], (int)cyeet[1]).distance(getScaledMousePosition()) <= dist)
+							{
+								idx = pathPts.size() - 1;
+								dist = new Point((int)cyeet[0], (int)cyeet[1]).distance(getScaledMousePosition());
+							}
+						}
+						if(idx == -1)
+						{
+							g2.drawLine((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(), getScaledMousePosition().x, getScaledMousePosition().y);	
+							addAngle = LineMath.Angle(new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()), new Point(getScaledMousePosition().x, getScaledMousePosition().y));
+							addDistance = new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()).distance(new Point(getScaledMousePosition().x, getScaledMousePosition().y)) * inchPerPixel;
+						}
+						else
+						{
+							g2.drawLine((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(), pathPts.get(idx).x, pathPts.get(idx).y);
+							addAngle = LineMath.Angle(new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()), pathPts.get(idx));
+							addDistance = new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()).distance(pathPts.get(idx)) * inchPerPixel;
 						}
 					}
-					if(idx == -1)
+					else
 					{
 						g2.drawLine((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(), getScaledMousePosition().x, getScaledMousePosition().y);	
 						addAngle = LineMath.Angle(new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()), new Point(getScaledMousePosition().x, getScaledMousePosition().y));
 						addDistance = new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()).distance(new Point(getScaledMousePosition().x, getScaledMousePosition().y)) * inchPerPixel;
-					}
-					else
-					{
-						g2.drawLine((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(), pathPts.get(idx).x, pathPts.get(idx).y);
-						addAngle = LineMath.Angle(new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()), pathPts.get(idx));
-						addDistance = new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()).distance(pathPts.get(idx)) * inchPerPixel;
 					}
 				}
 				
@@ -476,6 +487,9 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		menu.add(file);
 		
 		settings.add(setDefaultSpeed);
+		
+		snapToPoints.setSelected(true);
+		settings.add(snapToPoints);
 		menu.add(settings);
 		
 		this.setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
@@ -802,26 +816,31 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				speeds.add(defaultSpeed);
 
 			}
-			else {	
-				double[] cyeet = new double[6];
-				ArrayList<Point> pathPts = new ArrayList<Point>();
-				int idx = -1;
-				double dist = 20;
-				for(PathIterator glagla = path.getPathIterator(null); !glagla.isDone(); glagla.next())
+			else {
+				if(snapToPoints.getState())
 				{
-					int t = glagla.currentSegment(cyeet);
-					if(cyeet[0] == 0 && cyeet[1] == 0) continue;
-					pathPts.add(new Point((int)cyeet[0], (int)cyeet[1]));
-					if(new Point((int)cyeet[0], (int)cyeet[1]).distance(getScaledMousePosition()) <= dist)
+					double[] cyeet = new double[6];
+					ArrayList<Point> pathPts = new ArrayList<Point>();
+					int idx = -1;
+					double dist = 20;
+					for(PathIterator glagla = path.getPathIterator(null); !glagla.isDone(); glagla.next())
 					{
-						idx = pathPts.size() - 1;
-						dist = new Point((int)cyeet[0], (int)cyeet[1]).distance(getScaledMousePosition());
+						int t = glagla.currentSegment(cyeet);
+						if(cyeet[0] == 0 && cyeet[1] == 0) continue;
+						pathPts.add(new Point((int)cyeet[0], (int)cyeet[1]));
+						if(new Point((int)cyeet[0], (int)cyeet[1]).distance(getScaledMousePosition()) <= dist)
+						{
+							idx = pathPts.size() - 1;
+							dist = new Point((int)cyeet[0], (int)cyeet[1]).distance(getScaledMousePosition());
+						}
 					}
-				}
-				if(idx == -1)
-					path.lineTo(getScaledMousePosition().x, getScaledMousePosition().y);
+					if(idx == -1)
+						path.lineTo(getScaledMousePosition().x, getScaledMousePosition().y);
+					else
+						path.lineTo(pathPts.get(idx).x, pathPts.get(idx).y);
+					}
 				else
-					path.lineTo(pathPts.get(idx).x, pathPts.get(idx).y);
+					path.lineTo(getScaledMousePosition().x, getScaledMousePosition().y);
 				speeds.add(defaultSpeed);
 			}		
 			
