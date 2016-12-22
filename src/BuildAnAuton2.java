@@ -150,21 +150,93 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 					int pX = (int) path.getCurrentPoint().getX();
 					int pY = (int) path.getCurrentPoint().getY();
 					double angle = Math.atan2(mouseY-pY, mouseX-pX)*180.0/Math.PI;
-					if(angle < 45 && angle > -45 || angle >135 ||angle < -135) {
+					if(angle < 0) angle += 360;
+					/*
+					 * 					
+					if(angle < 45 && angle > -45 || angle >135 ||angle < -135)
+					{
 						g2.drawLine(pX, pY, mouseX, pY);
 						addAngle = LineMath.Angle(new Point(pX, pY), new Point(mouseX, pY));
 						addDistance = new Point(pX, pY).distance(new Point(mouseX, pY)) * inchPerPixel;
 					}
-					else if( (angle >= 45 && angle <= 135) ||(angle >= -135 && angle <=-45)) {
+					else if( (angle >= 45 && angle <= 135) ||(angle >= -135 && angle <=-45))
+					{
 						g2.drawLine(pX, pY, pX, mouseY);
 						addAngle = LineMath.Angle(new Point(pX, pY), new Point(pX, mouseY));
 						addDistance = new Point(pX, pY).distance(new Point(pX, mouseY)) * inchPerPixel;
 					}
+					 */
+					
+					if(angle > 157.5 && angle < 202.5 || angle > 337.5 || angle < 22.5)
+					{
+						g2.drawLine(pX, pY, mouseX, pY);
+						addAngle = LineMath.Angle(new Point(pX, pY), new Point(mouseX, pY));
+						addDistance = new Point(pX, pY).distance(new Point(mouseX, pY)) * inchPerPixel;
+					}
+					else if( (angle > 247.5 && angle < 292.5) || (angle > 67.5 && angle < 112.5))
+					{
+						g2.drawLine(pX, pY, pX, mouseY);
+						addAngle = LineMath.Angle(new Point(pX, pY), new Point(pX, mouseY));
+						addDistance = new Point(pX, pY).distance(new Point(pX, mouseY)) * inchPerPixel;
+					}
+					else if(angle > 22.5 && angle < 67.5)
+					{
+						double length = LineMath.HypotenuseLength(pX - mouseX, pY - mouseY);
+						g2.drawLine(pX, pY, pX + (int)(length * Math.sin(45 * Math.PI / 180)), pY + (int)(length * Math.cos(45 * Math.PI / 180)));
+						addAngle = 45.0;
+						addDistance = length * inchPerPixel;
+					}
+					else if(angle > 202.5 && angle < 247.5)
+					{
+						double length = LineMath.HypotenuseLength(pX - mouseX, pY - mouseY);
+						g2.drawLine(pX, pY, pX - (int)(length * Math.sin(45 * Math.PI / 180)), pY - (int)(length * Math.cos(45 * Math.PI / 180)));
+						addAngle = 225;
+						addDistance = length * inchPerPixel;
+					}
+					else if(angle > 292.5 && angle < 337.5)
+					{
+						double length = LineMath.HypotenuseLength(pX - mouseX, pY - mouseY);
+						g2.drawLine(pX, pY, pX + (int)(length * Math.sin(45 * Math.PI / 180)), pY - (int)(length * Math.cos(45 * Math.PI / 180)));
+						addAngle = 315;
+						addDistance = length * inchPerPixel;
+					}
+					else if(angle > 112.5 && angle < 157.5)
+					{
+						double length = LineMath.HypotenuseLength(pX - mouseX, pY - mouseY);
+						g2.drawLine(pX, pY, pX - (int)(length * Math.sin(45 * Math.PI / 180)), pY + (int)(length * Math.cos(45 * Math.PI / 180)));
+						addAngle = 135;
+						addDistance = length * inchPerPixel;
+					}
 				}
-				else {					
-					g2.drawLine((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(), getScaledMousePosition().x, getScaledMousePosition().y);			
-					addAngle = LineMath.Angle(new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()), new Point(getScaledMousePosition().x, getScaledMousePosition().y));
-					addDistance = new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()).distance(new Point(getScaledMousePosition().x, getScaledMousePosition().y)) * inchPerPixel;
+				else
+				{		
+					double[] cyeet = new double[6];
+					ArrayList<Point> pathPts = new ArrayList<Point>();
+					int idx = -1;
+					double dist = 20;
+					for(PathIterator glagla = path.getPathIterator(null); !glagla.isDone(); glagla.next())
+					{
+						int t = glagla.currentSegment(cyeet);
+						if(cyeet[0] == 0 && cyeet[1] == 0) continue;
+						pathPts.add(new Point((int)cyeet[0], (int)cyeet[1]));
+						if(new Point((int)cyeet[0], (int)cyeet[1]).distance(getScaledMousePosition()) <= dist)
+						{
+							idx = pathPts.size() - 1;
+							dist = new Point((int)cyeet[0], (int)cyeet[1]).distance(getScaledMousePosition());
+						}
+					}
+					if(idx == -1)
+					{
+						g2.drawLine((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(), getScaledMousePosition().x, getScaledMousePosition().y);	
+						addAngle = LineMath.Angle(new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()), new Point(getScaledMousePosition().x, getScaledMousePosition().y));
+						addDistance = new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()).distance(new Point(getScaledMousePosition().x, getScaledMousePosition().y)) * inchPerPixel;
+					}
+					else
+					{
+						g2.drawLine((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(), pathPts.get(idx).x, pathPts.get(idx).y);
+						addAngle = LineMath.Angle(new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()), pathPts.get(idx));
+						addDistance = new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()).distance(pathPts.get(idx)) * inchPerPixel;
+					}
 				}
 				
 				addAngle = Math.round(addAngle * 100.0) / 100.0;
@@ -687,18 +759,69 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				int pX = (int) path.getCurrentPoint().getX();
 				int pY = (int) path.getCurrentPoint().getY();
 				double angle = Math.atan2(mouseY-pY, mouseX-pX)*180.0/Math.PI;
-				if(angle < 45 && angle > -45 || angle > 135 || angle < -135) {
+				if(angle < 0) angle += 360;
+				/*
+				 * 				
+				if(angle < 45 && angle > -45 || angle > 135 && angle < -135)
+				{
 					path.lineTo(mouseX, pY);
 				}
-				else if( (angle >= 45 && angle <= 135) ||(angle >= -135 && angle <=-45)) {
+				else if( (angle >= 45 && angle <= 135) ||(angle >= -135 && angle <=-45))
+				{
 					path.lineTo(pX, mouseY);
-
+				}
+				 */
+				if((angle > 157.5 && angle < 202.5) || angle > 337.5 || angle < 22.5)
+				{
+					path.lineTo(mouseX, pY);
+				}
+				else if( (angle > 247.5 && angle < 292.5) || (angle > 67.5 && angle < 112.5))
+				{
+					path.lineTo(pX, mouseY);
+				}
+				else if(angle > 22.5 && angle < 67.5)
+				{
+					double length = LineMath.HypotenuseLength(pX - mouseX, pY - mouseY);
+					path.lineTo(pX + (int)(length * Math.sin(45 * Math.PI / 180)), pY + (int)(length * Math.cos(45 * Math.PI / 180)));
+				}
+				else if(angle > 202.5 && angle < 247.5)
+				{
+					double length = LineMath.HypotenuseLength(pX - mouseX, pY - mouseY);
+					path.lineTo(pX - (int)(length * Math.sin(45 * Math.PI / 180)), pY - (int)(length * Math.cos(45 * Math.PI / 180)));
+				}
+				else if(angle > 292.5 && angle < 337.5)
+				{
+					double length = LineMath.HypotenuseLength(pX - mouseX, pY - mouseY);
+					path.lineTo(pX + (int)(length * Math.sin(45 * Math.PI / 180)), pY - (int)(length * Math.cos(45 * Math.PI / 180)));
+				}
+				else if(angle > 112.5 && angle < 157.5)
+				{
+					double length = LineMath.HypotenuseLength(pX - mouseX, pY - mouseY);
+					path.lineTo(pX - (int)(length * Math.sin(45 * Math.PI / 180)), pY + (int)(length * Math.cos(45 * Math.PI / 180)));
 				}
 				speeds.add(defaultSpeed);
 
 			}
-			else {					
-				path.lineTo(getScaledMousePosition().x, getScaledMousePosition().y);
+			else {	
+				double[] cyeet = new double[6];
+				ArrayList<Point> pathPts = new ArrayList<Point>();
+				int idx = -1;
+				double dist = 20;
+				for(PathIterator glagla = path.getPathIterator(null); !glagla.isDone(); glagla.next())
+				{
+					int t = glagla.currentSegment(cyeet);
+					if(cyeet[0] == 0 && cyeet[1] == 0) continue;
+					pathPts.add(new Point((int)cyeet[0], (int)cyeet[1]));
+					if(new Point((int)cyeet[0], (int)cyeet[1]).distance(getScaledMousePosition()) <= dist)
+					{
+						idx = pathPts.size() - 1;
+						dist = new Point((int)cyeet[0], (int)cyeet[1]).distance(getScaledMousePosition());
+					}
+				}
+				if(idx == -1)
+					path.lineTo(getScaledMousePosition().x, getScaledMousePosition().y);
+				else
+					path.lineTo(pathPts.get(idx).x, pathPts.get(idx).y);
 				speeds.add(defaultSpeed);
 			}		
 			

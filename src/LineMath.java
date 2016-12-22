@@ -18,4 +18,8 @@ public class LineMath
 	{
 		return Math.toDegrees(Math.atan2(p2.y - p1.y, p2.x - p1.x));
 	}
+	public static double HypotenuseLength(double x, double y)
+	{
+		return Math.sqrt(x * x + y * y);
+	}
 }
