@@ -16,6 +16,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -338,7 +339,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 						int sidx = -1;
 					    for(int l = 0; l < pathPts.size() - 1; l++)
 					    {
-					    	double d = LineMath.DistanceToLine(getScaledMousePosition(), pathPts.get(l), pathPts.get(l + 1));
+					    	
+					    	double d = Line2D.ptSegDist(pathPts.get(l).x, pathPts.get(l).y, pathPts.get(l + 1).x, pathPts.get(l + 1).y, getScaledMousePosition().x, getScaledMousePosition().y);;
 					    	if(d < ldist)
 					    	{
 					    		ldist = d;
@@ -347,17 +349,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 					    	}
 					    }
 					    
-					    double lang = LineMath.Angle(lpts[0], lpts[1]),
-					    		lang2 = LineMath.Angle(lpts[1], lpts[0]),
-					    		mang = LineMath.Angle(lpts[0], getScaledMousePosition()),
-					    		mang2 = LineMath.Angle(lpts[1], getScaledMousePosition());
-					
-					    if(ldist < minDistance && 
-					    		lang - mang <= 40.0 && 
-					    		lang - mang >= -40.0 &&
-					    		lang2 - mang2 <= 40.0 &&
-					    		lang2 - mang2 >= -40.0
-					    		)
+					    if(ldist < minDistance)
 					    {
 					    	minDistance = ldist;
 					    	selected = lpts[0];
