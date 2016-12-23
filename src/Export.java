@@ -29,6 +29,7 @@ public class Export {
 	
 	CommandSet program = new CommandSet(); //The program to be exported
 	double inchPerPixel; //Conversion ratio from pixels to inches 
+	double initialAngle;
 	Double[] speeds; //
 	boolean flatten; // Whether to approximate curves to lines, or use arcs
 	boolean[] realBackwards;
@@ -37,13 +38,14 @@ public class Export {
 	
 	int numInMain;
 	
-	public Export(PathIterator path, double iPP, boolean[] backwards, CommandSet[] commands, boolean f, Double[] s) {
+	public Export(PathIterator path, double iPP, boolean[] backwards, CommandSet[] commands, boolean f, Double[] s, double iang) {
 		realPath = path;
 		inchPerPixel = iPP;
 		realBackwards = backwards;
 		realCommands = commands;
 		flatten = f;
 		speeds = s;
+		initialAngle = iang;
 	}
 	
 	public void convertToCommands(PathIterator path, CommandSet[] commands, double initialAngle, boolean[] backwards) {
@@ -147,9 +149,6 @@ public class Export {
 	 */
 	public  void export() {
 		try {
-						
-			double initialAngle = Double.parseDouble(JOptionPane.showInputDialog("Enter Initial Angle"));
-			
 			
 			convertToCommands(realPath, realCommands, initialAngle, realBackwards);
 
