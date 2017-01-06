@@ -157,6 +157,10 @@ public class Export {
 									 new BufferedOutputStream(
 									 new FileOutputStream(file)));
 
+//			for(Command c : program.getMain()) {
+//				System.out.println(c);
+//			}
+
 			oos.writeObject(program);
 			System.out.println(program);
 			

@@ -92,7 +92,7 @@ public class MoveStraightCommand implements Command {
 	}
 	
 	public String toString() {
-		return speed + " " + distance;
+		return speed + "/" + distance + "inches";
 	}
 
 }

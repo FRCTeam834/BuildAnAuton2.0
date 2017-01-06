@@ -46,7 +46,7 @@ public class TurnCommand implements Command {
 		
 	}
 	public String toString() {
-		return speed + " " + angle;
+		return speed + "/" + angle + " degrees";
 	}
 
 	
