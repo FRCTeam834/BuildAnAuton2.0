@@ -16,6 +16,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -53,6 +54,7 @@ import java.net.URL;
  * This is the main GUI for BuildAnAuton2.0. It displays the field, has save and load functionality etc.
  * 
  * @author Daniel Qian
+ * @author Ben Zalatan
  */
 public class BuildAnAuton2 extends JFrame implements MouseListener {
 	
@@ -79,6 +81,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 	JMenu settings = new JMenu("Settings");
 		public JMenuItem setDefaultSpeed = new JMenuItem("Set Default Speed");
 		public JCheckBoxMenuItem snapToPoints = new JCheckBoxMenuItem("Snap to Existing Points");
+		public JMenuItem setInitialAngle = new JMenuItem("Set Initial Angle");
 
 	CommandEditor cmdEditor;
 		
@@ -104,6 +107,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 	int pointSelected = -1;
 	
 	double addAngle, addDistance;
+	
+	double initialAngle;
 	
 	HashMap<Integer, Boolean> keys = new HashMap<>();
 	
@@ -149,22 +154,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 					int pY = (int) path.getCurrentPoint().getY();
 					double angle = Math.atan2(mouseY-pY, mouseX-pX)*180.0/Math.PI;
 					if(angle < 0) angle += 360;
-					/*
-					 * 					
-					if(angle < 45 && angle > -45 || angle >135 ||angle < -135)
-					{
-						g2.drawLine(pX, pY, mouseX, pY);
-						addAngle = LineMath.Angle(new Point(pX, pY), new Point(mouseX, pY));
-						addDistance = new Point(pX, pY).distance(new Point(mouseX, pY)) * inchPerPixel;
-					}
-					else if( (angle >= 45 && angle <= 135) ||(angle >= -135 && angle <=-45))
-					{
-						g2.drawLine(pX, pY, pX, mouseY);
-						addAngle = LineMath.Angle(new Point(pX, pY), new Point(pX, mouseY));
-						addDistance = new Point(pX, pY).distance(new Point(pX, mouseY)) * inchPerPixel;
-					}
-					 */
-					
+
 					if(angle > 157.5 && angle < 202.5 || angle > 337.5 || angle < 22.5)
 					{
 						g2.drawLine(pX, pY, mouseX, pY);
@@ -338,7 +328,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 						int sidx = -1;
 					    for(int l = 0; l < pathPts.size() - 1; l++)
 					    {
-					    	double d = LineMath.DistanceToLine(getScaledMousePosition(), pathPts.get(l), pathPts.get(l + 1));
+					    	
+					    	double d = Line2D.ptSegDist(pathPts.get(l).x, pathPts.get(l).y, pathPts.get(l + 1).x, pathPts.get(l + 1).y, getScaledMousePosition().x, getScaledMousePosition().y);;
 					    	if(d < ldist)
 					    	{
 					    		ldist = d;
@@ -347,17 +338,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 					    	}
 					    }
 					    
-					    double lang = LineMath.Angle(lpts[0], lpts[1]),
-					    		lang2 = LineMath.Angle(lpts[1], lpts[0]),
-					    		mang = LineMath.Angle(lpts[0], getScaledMousePosition()),
-					    		mang2 = LineMath.Angle(lpts[1], getScaledMousePosition());
-					
-					    if(ldist < minDistance && 
-					    		lang - mang <= 40.0 && 
-					    		lang - mang >= -40.0 &&
-					    		lang2 - mang2 <= 40.0 &&
-					    		lang2 - mang2 >= -40.0
-					    		)
+					    if(ldist < minDistance)
 					    {
 					    	minDistance = ldist;
 					    	selected = lpts[0];
@@ -418,7 +399,6 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				curveSelected = -1;
 				pointSelected = -1;
 			}
-
 		}
 		
 		public Dimension getPreferredSize() {
@@ -486,6 +466,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		
 		snapToPoints.setSelected(true);
 		settings.add(snapToPoints);
+		settings.add(setInitialAngle);
 		menu.add(settings);
 		
 		this.setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
@@ -676,7 +657,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				speeds.set(i, speed <= 0 ? 0 : speed); 
 			}*/
 			
-			Export exporter = new Export(path.getPathIterator(null), inchPerPixel, backwards, commands, true, speeds.toArray(new Double[0]));
+			Export exporter = new Export(path.getPathIterator(null), inchPerPixel, backwards, commands, true, speeds.toArray(new Double[0]), initialAngle);
 			exporter.export();
 
 		});
@@ -728,6 +709,12 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			defaultSpeed = val;
 		});
 		
+		setInitialAngle.addActionListener((ActionEvent e)  -> {
+			String input = JOptionPane.showInputDialog(null, "Default Initial Angle: ", initialAngle);
+			if(input == null || input == "") return;
+			initialAngle = Double.parseDouble(input);
+		});
+		
 		for(JButton b: tools) {
 			b.setFocusPainted(false);
 			b.setFocusable(false);
@@ -770,17 +757,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				int pY = (int) path.getCurrentPoint().getY();
 				double angle = Math.atan2(mouseY-pY, mouseX-pX)*180.0/Math.PI;
 				if(angle < 0) angle += 360;
-				/*
-				 * 				
-				if(angle < 45 && angle > -45 || angle > 135 && angle < -135)
-				{
-					path.lineTo(mouseX, pY);
-				}
-				else if( (angle >= 45 && angle <= 135) ||(angle >= -135 && angle <=-45))
-				{
-					path.lineTo(pX, mouseY);
-				}
-				 */
+
 				if((angle > 157.5 && angle < 202.5) || angle > 337.5 || angle < 22.5)
 				{
 					path.lineTo(mouseX, pY);
