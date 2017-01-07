@@ -69,9 +69,11 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		JButton delete = new JButton("Delete");
 		JButton restart = new JButton("Restart");
 		JButton speed = new JButton("Speed");
+		JButton turnSpeed = new JButton("Turn Speed");
+ 
 	
 	//Array of tools, allows program to disable/enable all
-	JButton[] tools = {add, add2, edit, select, delete, restart, speed};
+	JButton[] tools = {add, add2, edit, select, delete, restart, speed, turnSpeed};
 		
 	//Allows user to type commands into field, liek CAD program (not yet implemented)
 	JTextField prompt = new JTextField();
@@ -102,7 +104,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		SELECT,
 		EDIT,
 		DEL,
-		SPEED;
+		SPEED,
+		TURNSPEED;
 	}
 	SelectedTool tool = SelectedTool.NONE;
 	
@@ -140,10 +143,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		public void paintComponent(Graphics g) {
 			Graphics2D g2 = (Graphics2D) g;
 			
-			g2.setRenderingHint(
-					
-			        RenderingHints.KEY_ANTIALIASING,
-			        RenderingHints.VALUE_ANTIALIAS_ON);
+			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			
 			g2.setColor(Color.BLACK);
 			g2.setStroke(new BasicStroke(3));
@@ -442,12 +442,13 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		
 		toolbar.add(add);
 		//Disabled because curves aren't accurate.
-		toolbar.add(add2);
+//		toolbar.add(add2);
 		toolbar.add(edit);
 		toolbar.add(select);
 		toolbar.add(delete);
-		toolbar.add(restart);
 		toolbar.add(speed);
+		toolbar.add(turnSpeed);
+		toolbar.add(restart);
 				
 		file.add(save);
 		file.add(load);
@@ -639,6 +640,25 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			t.start();
 			tool = SelectedTool.SPEED;
 		});
+		turnSpeed.addActionListener((ActionEvent e) -> {
+			for(JButton b: tools) {
+				b.setEnabled(true);
+			}
+			turnSpeed.setEnabled(false);
+			Thread t = new Thread(() ->{
+				while(tool == SelectedTool.TURNSPEED) {
+					p.repaint();
+					try {
+						Thread.sleep(20);
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+				}
+			});
+			t.start();
+			tool = SelectedTool.TURNSPEED;
+		});
+
 
 
 		export.addActionListener((ActionEvent e) -> {					
