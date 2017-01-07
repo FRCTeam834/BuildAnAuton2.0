@@ -46,6 +46,8 @@ import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import java.lang.Math;
+
 import visualrobot.CommandSet;
 
 import java.net.URL;
@@ -58,7 +60,8 @@ import java.net.URL;
  */
 public class BuildAnAuton2 extends JFrame implements MouseListener {
 	
-	JToolBar toolbar = new JToolBar();
+	//Tools that allow you to manipulate the path/actions
+	JToolBar toolbar = new JToolBar(); 
 		JButton add = new JButton("Add");
 		JButton add2 = new JButton("Add Curve");
 		JButton edit = new JButton("Edit");
@@ -66,13 +69,17 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		JButton delete = new JButton("Delete");
 		JButton restart = new JButton("Restart");
 		JButton speed = new JButton("Speed");
-		
+	
+	//Array of tools, allows program to disable/enable all
 	JButton[] tools = {add, add2, edit, select, delete, restart, speed};
 		
+	//Allows user to type commands into field, liek CAD program (not yet implemented)
 	JTextField prompt = new JTextField();
 	
+	//Dialog for choosing save/load location
 	JFileChooser fs = new JFileChooser();
 	
+	//Menu options for file actions and settings
 	JMenuBar menu = new JMenuBar();
 	JMenu file = new JMenu("File");
 		public JMenuItem save = new JMenuItem("Save");
@@ -83,8 +90,10 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		public JCheckBoxMenuItem snapToPoints = new JCheckBoxMenuItem("Snap to Existing Points");
 		public JMenuItem setInitialAngle = new JMenuItem("Set Initial Angle");
 
+	//Dialog to edit secondary actions
 	CommandEditor cmdEditor;
-		
+	
+	//Helps with code readability (?) and keeps track of selected tool. I'm not sure I'm using this right
 	public enum SelectedTool {
 		NONE,
 		ADD,
@@ -96,28 +105,28 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 	}
 	SelectedTool tool = SelectedTool.NONE;
 	
-	double defaultSpeed = 0.5;
 	
-	boolean dragging = false;
+	double defaultSpeed = 0.5; //Default default speed. Can be changed in Settings -> Set Default Speed
 	
-	int addStep = 0;
-	Point temp;
+	boolean dragging = false; //Edit: whether a point is being moved
+	int addStep = 0; //Add Curve/Add2, which point is being added (endpoint or control point)
+	Point endPoint; //Add Curve/Add2, temporary point before control points are added
 	
-	int curveSelected = -1;
-	int pointSelected = -1;
+	int curveSelected = -1; //Edit, Delete, Select: Which part of the path is being selected
+	int pointSelected = -1; //Edit: Which point is being selected (curved paths have multiple points)
 	
-	double addAngle, addDistance;
-	
-	double initialAngle;
-	
+	//Map of keys that affect program when pressed (B and Shift). See ToggleListener
+	//The integer key is the key ID, the boolean value is whether it is being pressed
 	HashMap<Integer, Boolean> keys = new HashMap<>();
+
+	double initialAngle; //The starting angle of the robot, in degrees (right is 0, goes counter clockwise)
 	
 	boolean[] backwards = new boolean[0];
 	ArrayList<Double> speeds = new ArrayList<Double>();
 	CommandSet[] commands = new CommandSet[1];
 	
+	double inchPerPixel;
 	
-	double inchPerPixel = 0;
 	JScrollPane scrollPane = new JScrollPane();
 
 	public double zoom = 1;
@@ -144,8 +153,10 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			g2.draw(path);
 			
 			
-			if(tool == SelectedTool.ADD && p.getMousePosition() != null) {
 			
+			if(tool == SelectedTool.ADD && p.getMousePosition() != null) {
+				double addAngle, addDistance; //Displays values for angle (degrees) and distance (in) for line being added
+
 
 				if(keys.get(KeyEvent.VK_SHIFT)) {
 					int mouseX = getScaledMousePosition().x;
@@ -217,7 +228,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				if(addAngle < 0) addAngle += 360;
 				addDistance = Math.round(addDistance * 100.0) / 100.0;
 				
-				g2.drawString("Angle: " + addAngle + " degrees", 10, this.getHeight() - 25);
+				g2.drawString("Angle: " + (addAngle == 0 ? 0 :360-addAngle) + " degrees", 10, this.getHeight() - 25);
 				g2.drawString("Distance: " + addDistance + " in", 10, this.getHeight() - 10);
 			}
 			
@@ -229,11 +240,11 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				if(addStep == 1) {
 					QuadCurve2D.Double curve = new QuadCurve2D.Double((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(),
 																	   getScaledMousePosition().x, getScaledMousePosition().y, 
-																	   temp.x, temp.y);
+																	   endPoint.x, endPoint.y);
 					g2.draw(curve);
 					
 					g2.setColor(Color.BLUE);
-					g2.fill(new Ellipse2D.Double(temp.x-5, temp.y-5, 10, 10));
+					g2.fill(new Ellipse2D.Double(endPoint.x-5, endPoint.y-5, 10, 10));
 
 				}
 				
@@ -427,7 +438,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		
 		toolbar.add(add);
 		//Disabled because curves aren't accurate.
-//		toolbar.add(add2);
+		toolbar.add(add2);
 		toolbar.add(edit);
 		toolbar.add(select);
 		toolbar.add(delete);
@@ -790,7 +801,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		
 		else if(tool == SelectedTool.ADD2) {
 			if(addStep == 2) {
-				temp = getScaledMousePosition();
+				endPoint = getScaledMousePosition();
 				
 				addStep--;
 			}
@@ -812,7 +823,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 //					e1.printStackTrace();
 //				}
 				
-				path.quadTo(ctrlX, ctrlY, temp.x, temp.y);
+				path.quadTo(ctrlX, ctrlY, endPoint.x, endPoint.y);
 				backwards = Arrays.copyOf(backwards, backwards.length+1);
 				//speeds = Arrays.copyOf(speeds, speeds.length+1);
 				commands = Arrays.copyOf(commands, backwards.length+1);
