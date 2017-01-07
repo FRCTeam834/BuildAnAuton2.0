@@ -131,7 +131,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 
 	public double zoom = 1; //Zoom scale, adjusted using - and +/= keys
 	
-	int selectedLineIndex = -1, linesSelected = 0;//Speed
+	int selectedLineIndex = -1; //Which line is selected and
 	
 	JComponent p = new JComponent() {
 		public void paintComponent(Graphics g) {
@@ -262,7 +262,6 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			double minDistance = 20;
 			Point selected = new Point(0,0), lineEndSelected = new Point(0, 0);
 			
-			linesSelected = 0;
 			for(; !pi.isDone() && !done; pi.next()) {
 				int type = pi.currentSegment(coords);
 
@@ -310,22 +309,22 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 						for(PathIterator glagla = path.getPathIterator(null); !glagla.isDone(); glagla.next())
 						{
 							int t = glagla.currentSegment(cyeet);
-							if(cyeet[0] == 0 && cyeet[1] == 0) continue;
+//							if(cyeet[0] == 0 && cyeet[1] == 0) continue; //Not sure if this is necessary
 							pathPts.add(new Point((int)cyeet[0], (int)cyeet[1]));
 						}
 						
 						double ldist = Integer.MAX_VALUE;
 						Point[] lpts = new Point[0];
-						int sidx = -1;
+						int sindex = -1;
 					    for(int l = 0; l < pathPts.size() - 1; l++)
 					    {
 					    	
-					    	double d = Line2D.ptSegDist(pathPts.get(l).x, pathPts.get(l).y, pathPts.get(l + 1).x, pathPts.get(l + 1).y, getScaledMousePosition().x, getScaledMousePosition().y);;
+					    	double d = Line2D.ptSegDist(pathPts.get(l).x, pathPts.get(l).y, pathPts.get(l + 1).x, pathPts.get(l + 1).y, getScaledMousePosition().x, getScaledMousePosition().y);
 					    	if(d < ldist)
 					    	{
 					    		ldist = d;
 					    		lpts = new Point[]{pathPts.get(l), pathPts.get(l + 1)};
-					    		sidx = l;
+					    		sindex = l;
 					    	}
 					    }
 					    
@@ -336,8 +335,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 					    	lineEndSelected = lpts[1];
 					    	g2.setColor(Color.ORANGE);
 							g2.drawLine(selected.x, selected.y, lineEndSelected.x, lineEndSelected.y);
-							selectedLineIndex = sidx;
-							linesSelected++;
+							selectedLineIndex = sindex;
 					    }
 					}
 					g2.setColor(Color.BLUE);
@@ -640,14 +638,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		});
 
 
-		export.addActionListener((ActionEvent e) -> {		
-			/*double speed = java.lang.Double.parseDouble(JOptionPane.showInputDialog("Enter a speed between 0.0 and 1.0"));
-			
-			for(int i = 0; i < speeds.size(); i++) {
-				speeds.set(i, speed > 1 ? 1.0 : speed); 
-				speeds.set(i, speed <= 0 ? 0 : speed); 
-			}*/
-			
+		export.addActionListener((ActionEvent e) -> {					
 			Export exporter = new Export(path.getPathIterator(null), inchPerPixel, backwards, commands, true, speeds.toArray(new Double[0]), initialAngle);
 			exporter.export();
 
@@ -687,10 +678,10 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		});
 		
 		setDefaultSpeed.addActionListener((ActionEvent e)  -> {
-			String input = JOptionPane.showInputDialog(null, "Default Speed (-1 to 1): ", defaultSpeed);
+			String input = JOptionPane.showInputDialog(null, "Default Speed (0 to 1): ", defaultSpeed);
 			if(input == null || input == "") return;
 			double val = Double.parseDouble(input);
-			if(val < -1.0) val = -1.0;
+			if(val < 0) val = 0;
 			else if(val > 1.0) val = 1.0;
 			
 			for(int i = 0; i < speeds.size(); i++)
@@ -828,7 +819,6 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				
 				path.quadTo(ctrlX, ctrlY, endPoint.x, endPoint.y);
 				backwards = Arrays.copyOf(backwards, backwards.length+1);
-				//speeds = Arrays.copyOf(speeds, speeds.length+1);
 				commands = Arrays.copyOf(commands, backwards.length+1);
 
 				backwards[backwards.length-1] = keys.get(KeyEvent.VK_B);
@@ -905,12 +895,12 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			path = tempPath;
 			p.repaint();
 		}
-		else if(tool == SelectedTool.SPEED && selectedLineIndex != -1 && linesSelected > 0)
+		else if(tool == SelectedTool.SPEED && selectedLineIndex != -1)
 		{
-			String input = JOptionPane.showInputDialog(null, "Speed (-1 to 1): ", speeds.get(selectedLineIndex));
+			String input = JOptionPane.showInputDialog(null, "Speed (0 to 1): ", speeds.get(selectedLineIndex));
 			if(input == null || input == "") return;
 			double val = Double.parseDouble(input);
-			if(val < -1.0) val = -1.0;
+			if(val < 0) val = 0;
 			else if(val > 1.0) val = 1.0;
 			
 			speeds.set(selectedLineIndex, val);
