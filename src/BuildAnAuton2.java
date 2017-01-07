@@ -87,6 +87,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		public JMenuItem export = new JMenuItem("Export");
 	JMenu settings = new JMenu("Settings");
 		public JMenuItem setDefaultSpeed = new JMenuItem("Set Default Speed");
+		public JMenuItem setDefaultTurnSpeed = new JMenuItem("Set Default Turn Speed");
 		public JCheckBoxMenuItem snapToPoints = new JCheckBoxMenuItem("Snap to Existing Points");
 		public JMenuItem setInitialAngle = new JMenuItem("Set Initial Angle");
 
@@ -107,6 +108,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 	
 	
 	double defaultSpeed = 0.5; //Default default speed. Can be changed in Settings -> Set Default Speed
+	double defaultTurnSpeed = 0.5; //Default turn speed. Can be changed in Settings -> Set Default Turn Speed
 	
 	boolean dragging = false; //Edit: whether a point is being moved
 	int addStep = 0; //Add Curve/Add2, which point is being added (endpoint or control point)
@@ -123,6 +125,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 	
 	boolean[] backwards = new boolean[0]; //Whether the robot travels backwards along each sub path 
 	ArrayList<Double> speeds = new ArrayList<Double>(); //The speed the robot travels along each sub path
+	ArrayList<Double> turnSpeeds = new ArrayList<Double>(); //The speed the robot turns at each point
 	CommandSet[] commands = new CommandSet[1]; //A set of secondary Commands to run when the robot reaches each point (includes start)
 	
 	double inchPerPixel; //Conversion ratio from diagram to real field
@@ -684,12 +687,27 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			if(val < 0) val = 0;
 			else if(val > 1.0) val = 1.0;
 			
+			//This is a little hacky
 			for(int i = 0; i < speeds.size(); i++)
 				if(speeds.get(i) == defaultSpeed)
 					speeds.set(i, val);
 			
 			defaultSpeed = val;
 		});
+		setDefaultTurnSpeed.addActionListener((ActionEvent e) -> {
+			String input = JOptionPane.showInputDialog(null, "Default Turn Speed (0 to 1): ", defaultTurnSpeed);
+			if(input == null || input == "") return;
+			double val = Double.parseDouble(input);
+			if(val < 0) val = 0;
+			else if(val > 1.0) val = 1.0;
+			
+			for(int i = 0; i < turnSpeeds.size(); i++)
+				if(turnSpeeds.get(i) == defaultTurnSpeed)
+					turnSpeeds.set(i, val);
+			
+			defaultTurnSpeed = val;
+		});
+
 		
 		setInitialAngle.addActionListener((ActionEvent e)  -> {
 			String input = JOptionPane.showInputDialog(null, "Default Initial Angle: ", initialAngle);
@@ -784,7 +802,6 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			}		
 			
 			backwards = Arrays.copyOf(backwards, backwards.length+1);
-			//speeds = Arrays.copyOf(speeds, speeds.size()+1);
 			commands = Arrays.copyOf(commands, commands.length+1);
 			
 			backwards[backwards.length-1] = keys.get(KeyEvent.VK_B);
