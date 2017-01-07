@@ -157,7 +157,6 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			g2.draw(path);
 			
 			
-			
 			if(tool == SelectedTool.ADD && p.getMousePosition() != null) {
 				double addAngle, addDistance; //Displays values for angle (degrees) and distance (in) for line being added
 
@@ -271,7 +270,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				if(type == 0) {
 					
 					g2.setColor(Color.GREEN);
-					if((tool == SelectedTool.EDIT || tool == SelectedTool.DEL || tool == SelectedTool.SELECT) && p.getMousePosition() != null) {
+					if((tool == SelectedTool.EDIT || tool == SelectedTool.DEL || tool == SelectedTool.SELECT || tool == SelectedTool.TURNSPEED) && p.getMousePosition() != null) {
 						double temp = getScaledMousePosition().distance(coords[0], coords[1]);
 						
 						if(temp < minDistance){
@@ -289,7 +288,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				}
 				
 				for(int k = 0; k < type * 2; k+=2) {
-					if((tool == SelectedTool.EDIT || tool == SelectedTool.DEL || tool == SelectedTool.SELECT) && p.getMousePosition() != null) {
+					if((tool == SelectedTool.EDIT || tool == SelectedTool.DEL || tool == SelectedTool.SELECT || tool == SelectedTool.TURNSPEED) && p.getMousePosition() != null) {
 
 						
 						double temp = getScaledMousePosition().distance(coords[k], coords[k+1]);
@@ -346,7 +345,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 					j++;
 				}
 				
-				if(i != backwards.length && backwards[i] ) {
+				if(i < backwards.length && backwards[i] ) {
 					g2.setColor(Color.RED);
 					
 					int k = type == 0 ? 0 : type * 2 - 2;
@@ -384,6 +383,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				if (tool == SelectedTool.SELECT) {
 					g2.setColor(Color.ORANGE);
 				}
+				
 				
 				g2.draw(new Ellipse2D.Double(selected.x-6, selected.y-6, 12, 12));
 			}
@@ -790,7 +790,6 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 					double angleRad = snappedAngle * Math.PI/180.0;
 					path.lineTo(pX + Math.cos(angleRad)*magnitude, pY + Math.sin(angleRad) * magnitude);
 				}
-				speeds.add(defaultSpeed);
 
 			}
 			else {
@@ -818,12 +817,13 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 					}
 				else
 					path.lineTo(getScaledMousePosition().x, getScaledMousePosition().y);
-				speeds.add(defaultSpeed);
 			}		
 			
 			backwards = Arrays.copyOf(backwards, backwards.length+1);
 			commands = Arrays.copyOf(commands, commands.length+1);
-			
+			speeds.add(defaultSpeed);
+			turnSpeeds.add(defaultTurnSpeed);
+
 			backwards[backwards.length-1] = keys.get(KeyEvent.VK_B);
 			commands[commands.length-1] = new CommandSet();
 			
@@ -860,7 +860,9 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 
 				backwards[backwards.length-1] = keys.get(KeyEvent.VK_B);
 				commands[commands.length-1] = new CommandSet();
-				
+				speeds.add(defaultSpeed);
+				turnSpeeds.add(defaultTurnSpeed);
+
 				addStep--;
 				tool = SelectedTool.NONE;
 				add2.setEnabled(true);
@@ -895,6 +897,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			Path2D.Double tempPath = new Path2D.Double();
 			boolean[] tempBackwards = new boolean[backwards.length-1];
 			double[] tempSpeeds = new double[speeds.size()-1];
+			double[] tempTurnSpeeds = new double[turnSpeeds.size()-1];
 
 			PathIterator pi = path.getPathIterator(null);
 			pi.currentSegment(coords);
@@ -916,6 +919,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 					tempPath.lineTo(coords[0], coords[1]);
 					tempBackwards[count] = backwards[i-1];
 					tempSpeeds[count] = speeds.get(i - 1);
+					tempTurnSpeeds[count] = turnSpeeds.get(i-1);
 					count++;
 				}
 
@@ -929,6 +933,11 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			speeds = new ArrayList<Double>();
 			for(int l = 0; l < tempSpeeds.length; l++)
 				speeds.add(tempSpeeds[l]);
+			
+			turnSpeeds = new ArrayList<Double>();
+			for(int j = 0; j < tempTurnSpeeds.length; j++)
+				turnSpeeds.add(tempTurnSpeeds[j]);
+
 			path = tempPath;
 			p.repaint();
 		}
@@ -941,6 +950,17 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			else if(val > 1.0) val = 1.0;
 			
 			speeds.set(selectedLineIndex, val);
+		}
+		else if(tool == SelectedTool.TURNSPEED && curveSelected != -1 && curveSelected != turnSpeeds.size()) {
+			int tempIndex = curveSelected;
+			String input = JOptionPane.showInputDialog(null, "Turn Speed (0 to 1): ", turnSpeeds.get(curveSelected));
+			if(input == null || input == "") return;
+			double val = Double.parseDouble(input);
+			if(val < 0) val = 0;
+			else if(val > 1.0) val = 1.0;
+			
+			turnSpeeds.set(tempIndex, val);
+
 		}
 	}
 	
