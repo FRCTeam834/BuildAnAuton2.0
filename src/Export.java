@@ -157,9 +157,9 @@ public class Export {
 									 new BufferedOutputStream(
 									 new FileOutputStream(file)));
 
-//			for(Command c : program.getMain()) {
-//				System.out.println(c);
-//			}
+			for(Command c : program.getMain()) {
+				System.out.println(c);
+			}
 
 			oos.writeObject(program);
 			System.out.println(program);
@@ -311,8 +311,8 @@ public class Export {
 		commands.add(new MoveAlongCurveCommand(radius * inchPerPixel,  backwards ? -speed : speed, -dTheta)); 
 		numInMain+=2;
 
-		System.out.println("Turning " + -AngleError + " Degrees");
-		System.out.println("Extent: " + dTheta + "\tRadius: " + radius * inchPerPixel);
+//		System.out.println("Turning " + -AngleError + " Degrees");
+//		System.out.println("Extent: " + dTheta + "\tRadius: " + radius * inchPerPixel);
 		
 		if(goal < 1) {
 			convertCurve(commands, goal, curve, fAngle + (dTheta < 0 ? -90 : 90), speed, backwards, inchPerPixel);

@@ -121,23 +121,24 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 
 	double initialAngle; //The starting angle of the robot, in degrees (right is 0, goes counter clockwise)
 	
-	boolean[] backwards = new boolean[0];
-	ArrayList<Double> speeds = new ArrayList<Double>();
-	CommandSet[] commands = new CommandSet[1];
+	boolean[] backwards = new boolean[0]; //Whether the robot travels backwards along each sub path 
+	ArrayList<Double> speeds = new ArrayList<Double>(); //The speed the robot travels along each sub path
+	CommandSet[] commands = new CommandSet[1]; //A set of secondary Commands to run when the robot reaches each point (includes start)
 	
-	double inchPerPixel;
+	double inchPerPixel; //Conversion ratio from diagram to real field
 	
-	JScrollPane scrollPane = new JScrollPane();
+	JScrollPane scrollPane = new JScrollPane(); //Allows the user to scroll to see entire field
 
-	public double zoom = 1;
+	public double zoom = 1; //Zoom scale, adjusted using - and +/= keys
 	
-	int selectedLineIndex = -1, linesSelected = 0;
+	int selectedLineIndex = -1, linesSelected = 0;//Speed
 	
 	JComponent p = new JComponent() {
 		public void paintComponent(Graphics g) {
 			Graphics2D g2 = (Graphics2D) g;
 			
 			g2.setRenderingHint(
+					
 			        RenderingHints.KEY_ANTIALIASING,
 			        RenderingHints.VALUE_ANTIALIAS_ON);
 			
@@ -224,11 +225,13 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 					}
 				}
 				
-				addAngle = Math.round(addAngle * 100.0) / 100.0;
+				addAngle = addAngle == 0 ? 0 :360-addAngle; //Cause y is inverted on screen
+				addAngle = Math.round(addAngle * 100.0) / 100.0; 
+
 				if(addAngle < 0) addAngle += 360;
 				addDistance = Math.round(addDistance * 100.0) / 100.0;
 				
-				g2.drawString("Angle: " + (addAngle == 0 ? 0 :360-addAngle) + " degrees", 10, this.getHeight() - 25);
+				g2.drawString("Angle: " + addAngle + " degrees", 10, this.getHeight() - 25);
 				g2.drawString("Distance: " + addDistance + " in", 10, this.getHeight() - 10);
 			}
 			
@@ -700,7 +703,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		setInitialAngle.addActionListener((ActionEvent e)  -> {
 			String input = JOptionPane.showInputDialog(null, "Default Initial Angle: ", initialAngle);
 			if(input == null || input == "") return;
-			initialAngle = Double.parseDouble(input);
+			initialAngle = 360 - Double.parseDouble(input);
 		});
 		
 		for(JButton b: tools) {
