@@ -434,7 +434,6 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		keys.put(KeyEvent.VK_SHIFT, false);
 		
 		inchPerPixel = 185.3/262.0; //650.22/field.getWidth() <- 2016 Field; 
-		System.out.println(inchPerPixel);
 		
 		scrollPane.setViewportView(p);
 		scrollPane.setPreferredSize(new Dimension(field.getWidth()+4, field.getHeight()+4));
