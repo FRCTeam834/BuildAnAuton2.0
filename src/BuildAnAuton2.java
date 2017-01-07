@@ -336,7 +336,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 					    	minDistance = ldist;
 					    	selected = lpts[0];
 					    	lineEndSelected = lpts[1];
-					    	g2.setColor(Color.ORANGE);
+					    	g2.setColor(Color.MAGENTA);
 							g2.drawLine(selected.x, selected.y, lineEndSelected.x, lineEndSelected.y);
 							selectedLineIndex = sindex;
 					    }
@@ -384,9 +384,13 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				if (tool == SelectedTool.SELECT) {
 					g2.setColor(Color.ORANGE);
 				}
+				if (tool == SelectedTool.TURNSPEED) {
+					g2.setColor(Color.MAGENTA);
+				}
+
 				
-				
-				g2.draw(new Ellipse2D.Double(selected.x-6, selected.y-6, 12, 12));
+				if (tool != SelectedTool.SPEED)
+					g2.draw(new Ellipse2D.Double(selected.x-6, selected.y-6, 12, 12));
 			}
 			else if (!dragging){
 				curveSelected = -1;
