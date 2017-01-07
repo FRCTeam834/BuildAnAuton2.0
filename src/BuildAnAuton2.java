@@ -663,7 +663,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 
 
 		export.addActionListener((ActionEvent e) -> {					
-			Export exporter = new Export(path.getPathIterator(null), inchPerPixel, backwards, commands, true, speeds.toArray(new Double[0]), initialAngle);
+			Export exporter = new Export(path.getPathIterator(null), inchPerPixel, backwards, commands, true, speeds, turnSpeeds, initialAngle);
 			exporter.export();
 
 		});

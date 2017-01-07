@@ -30,7 +30,8 @@ public class Export {
 	CommandSet program = new CommandSet(); //The program to be exported
 	double inchPerPixel; //Conversion ratio from pixels to inches 
 	double initialAngle;
-	Double[] speeds; //
+	ArrayList<Double> speeds; //
+	ArrayList<Double> turnSpeeds;
 	boolean flatten; // Whether to approximate curves to lines, or use arcs
 	boolean[] realBackwards;
 	CommandSet[] realCommands;
@@ -38,13 +39,14 @@ public class Export {
 	
 	int numInMain;
 	
-	public Export(PathIterator path, double iPP, boolean[] backwards, CommandSet[] commands, boolean f, Double[] s, double iang) {
+	public Export(PathIterator path, double iPP, boolean[] backwards, CommandSet[] commands, boolean f, ArrayList<Double> s, ArrayList<Double> ts, double iang) {
 		realPath = path;
 		inchPerPixel = iPP;
 		realBackwards = backwards;
 		realCommands = commands;
 		flatten = f;
 		speeds = s;
+		turnSpeeds = ts;
 		initialAngle = iang;
 	}
 	
@@ -101,11 +103,11 @@ public class Export {
 					}
 				}
 				
-				program.getMain().add(new TurnCommand(dAngle, speeds[i]));
+				program.getMain().add(new TurnCommand(dAngle, turnSpeeds.get(i)));
 				numInMain++;
 				
 				double distance = Math.sqrt(dX*dX+dY*dY) * inchPerPixel;
-				program.getMain().add(new MoveStraightCommand(distance, backwards[i] ? -speeds[i] : speeds[i]));				
+				program.getMain().add(new MoveStraightCommand(distance, backwards[i] ? -speeds.get(i) : speeds.get(i)));				
 				numInMain++;
 
 				System.out.println(dAngle+ " degrees, " + ((backwards[i] ? -1:1)*  distance) + " inches.");
@@ -117,12 +119,12 @@ public class Export {
 				if(flatten) {
 					QuadCurve2D.Double q = new QuadCurve2D.Double(lastX, lastY, coords[0], coords[1], coords[2], coords[3]);
 					if(backwards[i]) lastAngle += 180;
-					convertCurve2(program.getMain(), q, lastAngle, speeds[i], backwards[i], inchPerPixel);
+					convertCurve2(program.getMain(), q, lastAngle, speeds.get(i), backwards[i], inchPerPixel);
 				}
 				else {
 					QuadCurveEquation q = new QuadCurveEquation(new QuadCurve2D.Double(lastX, lastY, coords[0], coords[1], coords[2], coords[3]));
 					if(backwards[i]) lastAngle += 180;
-					convertCurve(program.getMain(), 0, q, lastAngle, speeds[i], backwards[i], inchPerPixel);
+					convertCurve(program.getMain(), 0, q, lastAngle, speeds.get(i), backwards[i], inchPerPixel);
 				}
 				break;
 			case 3:
