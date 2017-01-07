@@ -154,47 +154,24 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 					int pY = (int) path.getCurrentPoint().getY();
 					double angle = Math.atan2(mouseY-pY, mouseX-pX)*180.0/Math.PI;
 					if(angle < 0) angle += 360;
+					addAngle = Math.round(angle/45.0) * 45.0;
 
-					if(angle > 157.5 && angle < 202.5 || angle > 337.5 || angle < 22.5)
-					{
+					if(addAngle == 180 || addAngle == 0) {
 						g2.drawLine(pX, pY, mouseX, pY);
-						addAngle = LineMath.Angle(new Point(pX, pY), new Point(mouseX, pY));
-						addDistance = new Point(pX, pY).distance(new Point(mouseX, pY)) * inchPerPixel;
+						addDistance = Math.abs(mouseX-pX) * inchPerPixel;
 					}
-					else if( (angle > 247.5 && angle < 292.5) || (angle > 67.5 && angle < 112.5))
-					{
+					else if (addAngle == 90 || addAngle == 270) {
 						g2.drawLine(pX, pY, pX, mouseY);
-						addAngle = LineMath.Angle(new Point(pX, pY), new Point(pX, mouseY));
-						addDistance = new Point(pX, pY).distance(new Point(pX, mouseY)) * inchPerPixel;
+						addDistance = Math.abs(mouseY-pY) * inchPerPixel;
+
 					}
-					else if(angle > 22.5 && angle < 67.5)
-					{
-						double length = LineMath.HypotenuseLength(pX - mouseX, pY - mouseY);
-						g2.drawLine(pX, pY, pX + (int)(length * Math.sin(45 * Math.PI / 180)), pY + (int)(length * Math.cos(45 * Math.PI / 180)));
-						addAngle = 45.0;
-						addDistance = length * inchPerPixel;
+					else {
+						double magnitude = Math.sqrt(Math.pow(pX - mouseX, 2) + Math.pow(pY - mouseY, 2));
+						addDistance = magnitude * inchPerPixel;
+						double angleRadians = addAngle * Math.PI/180.0;
+						g2.drawLine(pX, pY, (int) (pX + Math.cos(angleRadians) * magnitude), (int) (pY + Math.sin(angleRadians) * magnitude));	
 					}
-					else if(angle > 202.5 && angle < 247.5)
-					{
-						double length = LineMath.HypotenuseLength(pX - mouseX, pY - mouseY);
-						g2.drawLine(pX, pY, pX - (int)(length * Math.sin(45 * Math.PI / 180)), pY - (int)(length * Math.cos(45 * Math.PI / 180)));
-						addAngle = 225;
-						addDistance = length * inchPerPixel;
-					}
-					else if(angle > 292.5 && angle < 337.5)
-					{
-						double length = LineMath.HypotenuseLength(pX - mouseX, pY - mouseY);
-						g2.drawLine(pX, pY, pX + (int)(length * Math.sin(45 * Math.PI / 180)), pY - (int)(length * Math.cos(45 * Math.PI / 180)));
-						addAngle = 315;
-						addDistance = length * inchPerPixel;
-					}
-					else if(angle > 112.5 && angle < 157.5)
-					{
-						double length = LineMath.HypotenuseLength(pX - mouseX, pY - mouseY);
-						g2.drawLine(pX, pY, pX - (int)(length * Math.sin(45 * Math.PI / 180)), pY + (int)(length * Math.cos(45 * Math.PI / 180)));
-						addAngle = 135;
-						addDistance = length * inchPerPixel;
-					}
+					
 				}
 				else
 				{		
@@ -218,21 +195,21 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 						if(idx == -1)
 						{
 							g2.drawLine((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(), getScaledMousePosition().x, getScaledMousePosition().y);	
-							addAngle = LineMath.Angle(new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()), new Point(getScaledMousePosition().x, getScaledMousePosition().y));
+							addAngle = Math.atan2(getScaledMousePosition().y - path.getCurrentPoint().getY(),  getScaledMousePosition().x-path.getCurrentPoint().getX()) * 180.0/Math.PI;
 							addDistance = new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()).distance(new Point(getScaledMousePosition().x, getScaledMousePosition().y)) * inchPerPixel;
 						}
 						else
 						{
 							g2.drawLine((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(), pathPts.get(idx).x, pathPts.get(idx).y);
-							addAngle = LineMath.Angle(new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()), pathPts.get(idx));
+							addAngle = Math.atan2(getScaledMousePosition().y - path.getCurrentPoint().getY(),  getScaledMousePosition().x-path.getCurrentPoint().getX()) * 180.0/Math.PI;
 							addDistance = new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()).distance(pathPts.get(idx)) * inchPerPixel;
 						}
 					}
 					else
 					{
 						g2.drawLine((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY(), getScaledMousePosition().x, getScaledMousePosition().y);	
-						addAngle = LineMath.Angle(new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()), new Point(getScaledMousePosition().x, getScaledMousePosition().y));
-						addDistance = new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()).distance(new Point(getScaledMousePosition().x, getScaledMousePosition().y)) * inchPerPixel;
+						addAngle = Math.atan2(getScaledMousePosition().y - path.getCurrentPoint().getY(),  getScaledMousePosition().x-path.getCurrentPoint().getX()) * 180.0/Math.PI;
+						 addDistance = new Point((int) path.getCurrentPoint().getX(), (int) path.getCurrentPoint().getY()).distance(new Point(getScaledMousePosition().x, getScaledMousePosition().y)) * inchPerPixel;
 					}
 				}
 				
@@ -240,7 +217,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				if(addAngle < 0) addAngle += 360;
 				addDistance = Math.round(addDistance * 100.0) / 100.0;
 				
-				g2.drawString("Angle: " + addAngle + "°", 10, this.getHeight() - 25);
+				g2.drawString("Angle: " + addAngle + " degrees", 10, this.getHeight() - 25);
 				g2.drawString("Distance: " + addDistance + " in", 10, this.getHeight() - 10);
 			}
 			
@@ -758,33 +735,17 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				double angle = Math.atan2(mouseY-pY, mouseX-pX)*180.0/Math.PI;
 				if(angle < 0) angle += 360;
 
-				if((angle > 157.5 && angle < 202.5) || angle > 337.5 || angle < 22.5)
-				{
+				double snappedAngle = Math.round(angle/45.0)*45.0;
+				if(snappedAngle == 0 || snappedAngle == 180) 
 					path.lineTo(mouseX, pY);
-				}
-				else if( (angle > 247.5 && angle < 292.5) || (angle > 67.5 && angle < 112.5))
+				else if(snappedAngle == 90 || snappedAngle == 270)
 				{
 					path.lineTo(pX, mouseY);
 				}
-				else if(angle > 22.5 && angle < 67.5)
-				{
-					double length = LineMath.HypotenuseLength(pX - mouseX, pY - mouseY);
-					path.lineTo(pX + (int)(length * Math.sin(45 * Math.PI / 180)), pY + (int)(length * Math.cos(45 * Math.PI / 180)));
-				}
-				else if(angle > 202.5 && angle < 247.5)
-				{
-					double length = LineMath.HypotenuseLength(pX - mouseX, pY - mouseY);
-					path.lineTo(pX - (int)(length * Math.sin(45 * Math.PI / 180)), pY - (int)(length * Math.cos(45 * Math.PI / 180)));
-				}
-				else if(angle > 292.5 && angle < 337.5)
-				{
-					double length = LineMath.HypotenuseLength(pX - mouseX, pY - mouseY);
-					path.lineTo(pX + (int)(length * Math.sin(45 * Math.PI / 180)), pY - (int)(length * Math.cos(45 * Math.PI / 180)));
-				}
-				else if(angle > 112.5 && angle < 157.5)
-				{
-					double length = LineMath.HypotenuseLength(pX - mouseX, pY - mouseY);
-					path.lineTo(pX - (int)(length * Math.sin(45 * Math.PI / 180)), pY + (int)(length * Math.cos(45 * Math.PI / 180)));
+				else { 
+					double magnitude = Math.sqrt((pX-mouseX) * (pX-mouseX) + (pY - mouseY) * (pY - mouseY)); //Find distance from end of current path to mouse
+					double angleRad = snappedAngle * Math.PI/180.0;
+					path.lineTo(pX + Math.cos(angleRad)*magnitude, pY + Math.sin(angleRad) * magnitude);
 				}
 				speeds.add(defaultSpeed);
 
