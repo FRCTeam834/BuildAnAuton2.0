@@ -92,6 +92,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		public JMenuItem setDefaultTurnSpeed = new JMenuItem("Set Default Turn Speed");
 		public JCheckBoxMenuItem snapToPoints = new JCheckBoxMenuItem("Snap to Existing Points");
 		public JMenuItem setInitialAngle = new JMenuItem("Set Initial Angle");
+		
 
 	//Dialog to edit secondary actions
 	CommandEditor cmdEditor;
@@ -414,7 +415,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 
 		}
 		else{
-			field = ImageIO.read(new File("field.png"));
+			field = ImageIO.read(new File("field2017.png"));
 
 		}
 
@@ -432,7 +433,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		keys.put(KeyEvent.VK_B, false);
 		keys.put(KeyEvent.VK_SHIFT, false);
 		
-		inchPerPixel = 650.22/field.getWidth(); //216 for garage
+		inchPerPixel = 185.3/262.0; //650.22/field.getWidth() <- 2016 Field; 
+		System.out.println(inchPerPixel);
 		
 		scrollPane.setViewportView(p);
 		scrollPane.setPreferredSize(new Dimension(field.getWidth()+4, field.getHeight()+4));
