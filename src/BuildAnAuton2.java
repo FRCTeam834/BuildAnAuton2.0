@@ -59,7 +59,7 @@ import java.net.URL;
  * @author Ben Zalatan
  */
 public class BuildAnAuton2 extends JFrame implements MouseListener {
-	
+		
 	//Tools that allow you to manipulate the path/actions
 	JToolBar toolbar = new JToolBar(); 
 		JButton add = new JButton("Add");
@@ -140,7 +140,10 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 	
 	int selectedLineIndex = -1; //Which line is selected and
 	
+	//Main panel, contains the 
 	JComponent p = new JComponent() {
+		
+		//Draws everything
 		public void paintComponent(Graphics g) {
 			Graphics2D g2 = (Graphics2D) g;
 			
@@ -149,37 +152,45 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			g2.setColor(Color.BLACK);
 			g2.setStroke(new BasicStroke(3));
 			
+			//Translates the field so it remains centered when zoomed out
 			if(field != null) {
 				if(zoom < 1)
 					g2.translate(-((zoom - 1) * field.getWidth())/2, -((zoom - 1) * field.getHeight())/2);
 				g2.scale(zoom, zoom);
 			}
-			g2.drawImage(field, 0, 0, null);
-			g2.draw(path);
+			
+			g2.drawImage(field, 0, 0, null); //Draws image of field
+			g2.draw(path); //Draws path's lines, without points
 			
 			
 			if(tool == SelectedTool.ADD && p.getMousePosition() != null) {
-				double addAngle, addDistance; //Displays values for angle (degrees) and distance (in) for line being added
+				double addAngle, addDistance; //Stores values for angle (degrees) and distance (in) for line being added to be displayed
 
-
+				//If shift is pressed, the add line will snap to multiples of 45 degrees
 				if(keys.get(KeyEvent.VK_SHIFT)) {
 					int mouseX = getScaledMousePosition().x;
 					int mouseY = getScaledMousePosition().y;
 					int pX = (int) path.getCurrentPoint().getX();
 					int pY = (int) path.getCurrentPoint().getY();
-					double angle = Math.atan2(mouseY-pY, mouseX-pX)*180.0/Math.PI;
-					if(angle < 0) angle += 360;
-					addAngle = Math.round(angle/45.0) * 45.0;
+					double angle = Math.atan2(mouseY-pY, mouseX-pX)*180.0/Math.PI; //Actual angle between mouse and last point
+					
+					if(angle < 0) angle += 360; //Keeps angle from 0-360 degrees
+					
+					addAngle = Math.round(angle/45.0) * 45.0; //addAngle is set to the closest multiple of 45
 
+					
+					//If line is horizontal, draw and calculate based on horizontal distance from point.
 					if(addAngle == 180 || addAngle == 0) {
 						g2.drawLine(pX, pY, mouseX, pY);
 						addDistance = Math.abs(mouseX-pX) * inchPerPixel;
 					}
+					//If line is vertical, draw and calculate based on vertical distance from point.
 					else if (addAngle == 90 || addAngle == 270) {
 						g2.drawLine(pX, pY, pX, mouseY);
 						addDistance = Math.abs(mouseY-pY) * inchPerPixel;
 
 					}
+					//If line is at 45 degree angle from orthogonal direction
 					else {
 						double magnitude = Math.sqrt(Math.pow(pX - mouseX, 2) + Math.pow(pY - mouseY, 2));
 						addDistance = magnitude * inchPerPixel;
@@ -190,21 +201,22 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				}
 				else
 				{		
+					//If the snapToPoint setting is enabled, find closest point less than 20 and snap to it
 					if(snapToPoints.getState())
 					{
-						double[] cyeet = new double[6];
+						double[] coords = new double[6];
 						ArrayList<Point> pathPts = new ArrayList<Point>();
 						int idx = -1;
 						double dist = 20;
-						for(PathIterator glagla = path.getPathIterator(null); !glagla.isDone(); glagla.next())
+						for(PathIterator pi = path.getPathIterator(null); !pi.isDone(); pi.next())
 						{
-							int t = glagla.currentSegment(cyeet);
-							if(cyeet[0] == 0 && cyeet[1] == 0) continue;
-							pathPts.add(new Point((int)cyeet[0], (int)cyeet[1]));
-							if(new Point((int)cyeet[0], (int)cyeet[1]).distance(getScaledMousePosition()) <= dist)
+							int t = pi.currentSegment(coords);
+							if(coords[0] == 0 && coords[1] == 0) continue;
+							pathPts.add(new Point((int)coords[0], (int)coords[1]));
+							if(new Point((int)coords[0], (int)coords[1]).distance(getScaledMousePosition()) <= dist)
 							{
 								idx = pathPts.size() - 1;
-								dist = new Point((int)cyeet[0], (int)cyeet[1]).distance(getScaledMousePosition());
+								dist = new Point((int)coords[0], (int)coords[1]).distance(getScaledMousePosition());
 							}
 						}
 						if(idx == -1)
@@ -228,10 +240,11 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 					}
 				}
 				
+				if(addAngle < 0) addAngle += 360;
+
 				addAngle = addAngle == 0 ? 0 :360-addAngle; //Cause y is inverted on screen
 				addAngle = Math.round(addAngle * 100.0) / 100.0; 
 
-				if(addAngle < 0) addAngle += 360;
 				addDistance = Math.round(addDistance * 100.0) / 100.0;
 				
 				g2.drawString("Angle: " + addAngle + " degrees", 10, this.getHeight() - 25);
@@ -398,6 +411,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			}
 		}
 		
+		//Overriding this method allows ScrollPane and zoom to work properly
 		public Dimension getPreferredSize() {
 			return new Dimension((int) (field.getWidth() * zoom), (int) (field.getHeight() * zoom));
 		}
