@@ -154,7 +154,7 @@ public class Export {
 			
 			convertToCommands(realPath, realCommands, initialAngle, realBackwards);
 
-			File file = new File("auton.autr");
+			File file = new File(JOptionPane.showInputDialog("Enter filename (no extension)"));
 			ObjectOutputStream oos = new ObjectOutputStream(
 									 new BufferedOutputStream(
 									 new FileOutputStream(file)));
