@@ -426,7 +426,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		
 		try {
 
-		URL ImageURL = BuildAnAuton2.class.getResource("field.png");
+		URL ImageURL = BuildAnAuton2.class.getResource("field2017.png");
 		if(ImageURL != null) {
 				field = ImageIO.read(ImageURL);
 			
