@@ -475,6 +475,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		menu.add(file);
 		
 		settings.add(setDefaultSpeed);
+		settings.add(setDefaultTurnSpeed);
 		
 		snapToPoints.setSelected(true);
 		settings.add(snapToPoints);

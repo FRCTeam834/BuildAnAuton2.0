@@ -48,8 +48,7 @@ public class MoveStraightCommand implements Command {
 
 			accumulatedError += angle; 
 			lastAngle = angle;
-			
-			
+						
 			//If the gyro's angle is less than zero, change the right wheel's speed.
 			if(gyro.getAngle() < 0){
 				rspeed -= Math.abs(gyro.getAngle()) * kP + accumulatedError * kI + changeInError * kD;

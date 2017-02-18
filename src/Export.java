@@ -153,8 +153,9 @@ public class Export {
 		try {
 			
 			convertToCommands(realPath, realCommands, initialAngle, realBackwards);
-
-			File file = new File(JOptionPane.showInputDialog("Enter filename (no extension)"));
+			String fName = JOptionPane.showInputDialog("Enter filename (no extension)") + ".autr";
+			File file = new File(fName);
+			
 			ObjectOutputStream oos = new ObjectOutputStream(
 									 new BufferedOutputStream(
 									 new FileOutputStream(file)));
@@ -180,7 +181,7 @@ public class Export {
 			}
 			
 			URL url = new URL("ftp://anonymous@roborio-" + teamNumber
-					+ "-frc.local/home/lvuser/auton.autr");
+					+ "-frc.local/home/lvuser/" + fName);
 			URLConnection conn = url.openConnection();
 			
 			
