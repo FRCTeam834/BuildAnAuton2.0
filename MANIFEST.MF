@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Class-Path: WPILib.jar
+Class-Path: ../../../java/current/lib/WPILib.jar
 Created-By: 1.8.0_66 (Oracle Corporation)
 Main-Class: BuildAnAuton2
 
