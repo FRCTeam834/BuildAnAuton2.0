@@ -11,7 +11,7 @@ import basicCommand.*;
 
 
 public class ChooseAuton {
-	CommandSet cmdSet = null;
+	public CommandSet cmdSet = null;
 	ArrayList<ArrayList<Command>> threads;
 	int[] threadStarts = null;
 	ArrayList<Command> main = new ArrayList<Command>();
