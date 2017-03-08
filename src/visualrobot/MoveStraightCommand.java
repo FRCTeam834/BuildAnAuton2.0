@@ -22,7 +22,7 @@ public class MoveStraightCommand implements Command {
 	private GyroBase gyro;
 	
 	//The speed the robot should move, the distance it should travel, and a c factor value.
-	private double speed, distance;
+	public double speed, distance;
 	private double kP, kI, kD; //PID Constants
 
 	public void execute() throws NullPointerException {

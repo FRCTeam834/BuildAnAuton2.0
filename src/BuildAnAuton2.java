@@ -694,7 +694,10 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				oos.writeObject(backwards);
 				oos.writeObject(speeds);
 				oos.writeObject(commands);
+				oos.writeObject(turnSpeeds);
 				oos.writeObject(path);
+				oos.writeDouble(defaultSpeed);
+				oos.writeDouble(defaultTurnSpeed);
 				oos.close();
 			} catch (Exception e1) {
 				e1.printStackTrace();
@@ -711,7 +714,11 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				backwards = (boolean[]) ois.readObject();
 				speeds = (ArrayList<Double>) ois.readObject();
 				commands = (CommandSet[]) ois.readObject();
+				turnSpeeds =  (ArrayList<Double>) ois.readObject();
 				path = (Path2D.Double) ois.readObject();
+//				defaultSpeed = ois.readDouble();
+//				defaultTurnSpeed = ois.readDouble();
+
 				ois.close();
 				p.repaint();
 				
@@ -740,7 +747,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			double val = Double.parseDouble(input);
 			if(val < 0) val = 0;
 			else if(val > 1.0) val = 1.0;
-			
+			System.out.println(val);
 			for(int i = 0; i < turnSpeeds.size(); i++)
 				if(turnSpeeds.get(i) == defaultTurnSpeed)
 					turnSpeeds.set(i, val);

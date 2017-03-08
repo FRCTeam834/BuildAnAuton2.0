@@ -21,6 +21,27 @@ public class ChooseAuton {
 		robot = r;
 	}
 	
+	public void run() {
+		
+		int i = 0;
+		while(robot.isAutonomous() && !robot.isDisabled() && i <= main.size()) {
+			System.out.println("Command " + i + " Running" );
+		
+			try {
+				for(int start = 1; start < threadStarts.length; start++)
+					if (threadStarts[start] == i)
+						(new Thread(new RunCommands(threads.get(start)))).start();
+				if(i != main.size())
+					main.get(i).execute();
+			}
+			catch(NullPointerException e) {System.out.println(e.getLocalizedMessage());}
+			finally {
+				i++;
+			}
+		}	
+
+	}
+	
 	public void chooseAuton(String fName) {
 		File file = new File("/home/lvuser/" + fName + ".autr"); //Select file
 		
@@ -49,23 +70,6 @@ public class ChooseAuton {
 		catch(IOException e){e.printStackTrace();} 
 		catch (ClassNotFoundException e) {e.printStackTrace();}
 
-				
-		int i = 0;
-		while(robot.isAutonomous() && !robot.isDisabled() && i <= main.size()) {
-			System.out.println("Command " + i + " Running" );
-
-			try {
-				for(int start = 1; start < threadStarts.length; start++)
-					if (threadStarts[start] == i)
-						(new Thread(new RunCommands(threads.get(start)))).start();
-				if(i != main.size())
-					main.get(i).execute();
-			}
-			catch(NullPointerException e) {System.out.println(e.getLocalizedMessage());}
-			finally {
-				i++;
-			}
-		}	
 
 	}
 	
