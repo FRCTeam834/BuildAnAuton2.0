@@ -698,6 +698,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				oos.writeObject(path);
 				oos.writeDouble(defaultSpeed);
 				oos.writeDouble(defaultTurnSpeed);
+				oos.writeDouble(initialAngle);
 				oos.close();
 			} catch (Exception e1) {
 				e1.printStackTrace();
@@ -718,6 +719,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				path = (Path2D.Double) ois.readObject();
 				defaultSpeed = ois.readDouble();
 				defaultTurnSpeed = ois.readDouble();
+				initialAngle = ois.readDouble();
+
 
 				ois.close();
 				p.repaint();
