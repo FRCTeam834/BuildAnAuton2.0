@@ -716,8 +716,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				commands = (CommandSet[]) ois.readObject();
 				turnSpeeds =  (ArrayList<Double>) ois.readObject();
 				path = (Path2D.Double) ois.readObject();
-//				defaultSpeed = ois.readDouble();
-//				defaultTurnSpeed = ois.readDouble();
+				defaultSpeed = ois.readDouble();
+				defaultTurnSpeed = ois.readDouble();
 
 				ois.close();
 				p.repaint();
