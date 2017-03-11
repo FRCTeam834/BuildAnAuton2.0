@@ -487,7 +487,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		fs.setFileFilter(new FileNameExtensionFilter("Auton", "aut"));
 		
 		speeds.add(defaultSpeed);
-		
+		turnSpeeds.add(defaultTurnSpeed);
 		add.addActionListener((ActionEvent e) -> {
 			for(JButton b: tools) {
 				b.setEnabled(true);

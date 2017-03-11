@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj.Encoder;
 public class Condition<T extends SensorBase> implements Serializable {
 	private static final long serialVersionUID = -5870690387575131701L;
 	private T sensor;
-	GyroBase gyro;		
 	double amount;
 	int sign;
 	String name;
