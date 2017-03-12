@@ -37,5 +37,9 @@ public class WaitCommand implements EditableCommand{
 		else 
 			return null;
 	}
+	
+	public String toString() {
+		return "Condition: " + (condition);
+	}
 
 }

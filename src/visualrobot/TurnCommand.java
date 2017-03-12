@@ -20,7 +20,7 @@ public class TurnCommand implements Command {
 		gyro.reset();
 		
 		if(angle != 0) {
-			while (angle > 0 ? gyro.getAngle() < angle : gyro.getAngle() > angle && !robot.isDisabled() && robot.isAutonomous()) {
+			while ((angle > 0 ? gyro.getAngle() < angle : gyro.getAngle() > angle) && !robot.isDisabled() && robot.isAutonomous()) {
 				robot.setRightSide(angle > 0 ? -speed : speed);
 				robot.setLeftSide(angle > 0 ? speed : -speed);
 			}

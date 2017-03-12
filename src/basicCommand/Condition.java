@@ -100,4 +100,8 @@ public class Condition<T extends SensorBase> implements Serializable {
 		return new String[]{n, name, Integer.toString(sign), Double.toString(amount)};
 	}
 	
+	public String toString() {
+		return name;				
+	}
+	
 }
