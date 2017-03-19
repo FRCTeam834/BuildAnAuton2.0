@@ -760,7 +760,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 
 		
 		setInitialAngle.addActionListener((ActionEvent e)  -> {
-			String input = JOptionPane.showInputDialog(null, "Default Initial Angle: ", initialAngle);
+			String input = JOptionPane.showInputDialog(null, "Initial Angle: ", initialAngle);
 			if(input == null || input == "") return;
 			initialAngle = 360 - Double.parseDouble(input);
 		});

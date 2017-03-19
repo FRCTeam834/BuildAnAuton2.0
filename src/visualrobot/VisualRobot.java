@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.SensorBase;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.SpeedController;
 
 /**
@@ -39,11 +40,13 @@ public abstract class VisualRobot extends SampleRobot{
 	protected HashMap<String, SensorBase> sensors = new HashMap<>();
 	
 	/**
-	 * Dictionary containing motor used by MotorCommand
+	 * Dictionary containing motors used by MotorCommand
 	 * Do not pass the motors used in setLeftSide and setRightSide
 	 */
 	protected HashMap<String, SpeedController> motors = new HashMap<>();
 	
+	protected HashMap<String, Servo> servos = new HashMap<>();
+
 	
 	public VisualRobot() {
 		super();
@@ -58,6 +61,11 @@ public abstract class VisualRobot extends SampleRobot{
 	public final HashMap<String, SpeedController> getMotors() {
 		return motors;
 	}
+	
+	public final HashMap<String, Servo> getServos() {
+		return servos;
+	}
+
 	
 	public abstract void autonomous();
 	
