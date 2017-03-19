@@ -150,11 +150,11 @@ public class Export {
 	 * Sends the program to the robot to be used
 	 */
 	public  void export() {
+		convertToCommands(realPath, realCommands, initialAngle, realBackwards);
+		String fName = JOptionPane.showInputDialog("Enter filename (no extension)") + ".autr";
+		File file = new File(fName);
+
 		try {
-			
-			convertToCommands(realPath, realCommands, initialAngle, realBackwards);
-			String fName = JOptionPane.showInputDialog("Enter filename (no extension)") + ".autr";
-			File file = new File(fName);
 			
 			ObjectOutputStream oos = new ObjectOutputStream(
 									 new BufferedOutputStream(
@@ -198,6 +198,7 @@ public class Export {
 			JOptionPane.showMessageDialog(null, "Failed to Export");
 
 			e.printStackTrace();
+			file.delete();
 		}
 	}
 
