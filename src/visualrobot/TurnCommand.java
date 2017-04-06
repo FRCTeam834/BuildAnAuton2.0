@@ -45,6 +45,12 @@ public class TurnCommand implements Command {
 			speed = s;
 		
 	}
+	
+	public TurnCommand mirror() {
+		return new TurnCommand(-angle, speed);
+		
+	}
+
 	public String toString() {
 		return speed + "/" + angle + " degrees";
 	}

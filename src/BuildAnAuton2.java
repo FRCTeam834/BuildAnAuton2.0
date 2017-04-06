@@ -15,6 +15,7 @@ import java.awt.event.MouseListener;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.QuadCurve2D;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
@@ -70,6 +71,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		JButton restart = new JButton("Restart");
 		JButton speed = new JButton("Speed");
 		JButton turnSpeed = new JButton("Turn Speed");
+		JButton mirror = new JButton("Mirror");
  
 	
 	//Array of tools, allows program to disable/enable all
@@ -468,6 +470,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		toolbar.add(speed);
 		toolbar.add(turnSpeed);
 		toolbar.add(restart);
+		toolbar.add(mirror);
 				
 		file.add(save);
 		file.add(load);
@@ -679,7 +682,13 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			tool = SelectedTool.TURNSPEED;
 		});
 
-
+		mirror.addActionListener((ActionEvent e) -> {
+			AffineTransform t = new AffineTransform();
+			t.scale(-1, 1);
+			t.translate(-path.getBounds2D().getWidth()*1.5, 0);
+			path.transform(t);
+			p.repaint();
+		});
 
 		export.addActionListener((ActionEvent e) -> {					
 			Export exporter = new Export(path.getPathIterator(null), inchPerPixel, backwards, commands, true, speeds, turnSpeeds, initialAngle);
