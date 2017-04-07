@@ -72,10 +72,11 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		JButton speed = new JButton("Speed");
 		JButton turnSpeed = new JButton("Turn Speed");
 		JButton mirror = new JButton("Mirror");
+		JButton translate = new JButton("Translate");
  
 	
 	//Array of tools, allows program to disable/enable all
-	JButton[] tools = {add, add2, edit, select, delete, restart, speed, turnSpeed};
+	JButton[] tools = {add, add2, edit, select, delete, restart, speed, turnSpeed, translate};
 		
 	//Allows user to type commands into field, liek CAD program (not yet implemented)
 	JTextField prompt = new JTextField();
@@ -92,8 +93,9 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 	JMenu settings = new JMenu("Settings");
 		public JMenuItem setDefaultSpeed = new JMenuItem("Set Default Speed");
 		public JMenuItem setDefaultTurnSpeed = new JMenuItem("Set Default Turn Speed");
-		public JCheckBoxMenuItem snapToPoints = new JCheckBoxMenuItem("Snap to Existing Points");
 		public JMenuItem setInitialAngle = new JMenuItem("Set Initial Angle");
+		public JMenuItem setTeamNumber= new JMenuItem("Set Team Number");
+		public JCheckBoxMenuItem snapToPoints = new JCheckBoxMenuItem("Snap to Existing Points");
 		
 
 	//Dialog to edit secondary actions
@@ -108,7 +110,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		EDIT,
 		DEL,
 		SPEED,
-		TURNSPEED;
+		TURNSPEED,
+		TRANSLATE;
 	}
 	SelectedTool tool = SelectedTool.NONE;
 	
@@ -116,7 +119,9 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 	double defaultSpeed = 0.5; //Default default speed. Can be changed in Settings -> Set Default Speed
 	double defaultTurnSpeed = 0.5; //Default turn speed. Can be changed in Settings -> Set Default Turn Speed
 	
-	boolean dragging = false; //Edit: whether a point is being moved
+	boolean dragging = false; //Edit/Translate: whether a point is being moved
+	Point refPoint = new Point(0,0);//Translate
+
 	int addStep = 0; //Add Curve/Add2, which point is being added (endpoint or control point)
 	Point endPoint; //Add Curve/Add2, temporary point before control points are added
 	
@@ -128,6 +133,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 	HashMap<Integer, Boolean> keys = new HashMap<>();
 
 	double initialAngle; //The starting angle of the robot, in degrees (right is 0, goes counter clockwise)
+	
+	String teamNumber = "";
 	
 	boolean[] backwards = new boolean[0]; //Whether the robot travels backwards along each sub path 
 	ArrayList<Double> speeds = new ArrayList<Double>(); //The speed the robot travels along each sub path
@@ -411,6 +418,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 				curveSelected = -1;
 				pointSelected = -1;
 			}
+			
 		}
 		
 		//Overriding this method allows ScrollPane and zoom to work properly
@@ -471,6 +479,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		toolbar.add(turnSpeed);
 		toolbar.add(restart);
 		toolbar.add(mirror);
+		toolbar.add(translate);
 				
 		file.add(save);
 		file.add(load);
@@ -479,10 +488,11 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		
 		settings.add(setDefaultSpeed);
 		settings.add(setDefaultTurnSpeed);
-		
+		settings.add(setInitialAngle);
+		settings.add(setTeamNumber);
 		snapToPoints.setSelected(true);
 		settings.add(snapToPoints);
-		settings.add(setInitialAngle);
+
 		menu.add(settings);
 		
 		this.setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
@@ -683,16 +693,35 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		});
 
 		mirror.addActionListener((ActionEvent e) -> {
-			AffineTransform t = new AffineTransform();
-			t.scale(-1, 1);
-			t.translate(-path.getBounds2D().getWidth()*1.5, 0);
-			path.transform(t);
+			AffineTransform t1 = new AffineTransform();
+
+			int w = path.getBounds().x + path.getBounds().width/2;
+			t1.translate(-2*w, 0);
+			path.transform(t1);
+
+			AffineTransform t2 = new AffineTransform();
+
+			t2.scale(-1, 1);
+
+			path.transform(t2);
 			p.repaint();
 		});
+		translate.addActionListener((ActionEvent e) -> {
+			for(JButton b: tools) {
+				b.setEnabled(true);
+			}
+			translate.setEnabled(false);
+			tool = SelectedTool.TRANSLATE;
 
+		});
+		
 		export.addActionListener((ActionEvent e) -> {					
 			Export exporter = new Export(path.getPathIterator(null), inchPerPixel, backwards, commands, true, speeds, turnSpeeds, initialAngle);
-			exporter.export();
+			if(teamNumber == "") {
+				teamNumber = JOptionPane.showInputDialog(null,"Enter Team Number");
+			}
+			exporter.export(teamNumber);
+			
 
 		});
 		save.addActionListener((ActionEvent e)  -> {
@@ -772,6 +801,16 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			String input = JOptionPane.showInputDialog(null, "Initial Angle: ", initialAngle);
 			if(input == null || input == "") return;
 			initialAngle = 360 - Double.parseDouble(input);
+			while(Math.abs(initialAngle) > 360) {
+				initialAngle -= Math.signum(initialAngle)*360;
+			}
+		});
+		
+		setTeamNumber.addActionListener((ActionEvent e) -> {
+			String input = JOptionPane.showInputDialog(null, "Team Number: ", initialAngle);
+			if(input == null || input == "") return;
+			teamNumber = input;
+			
 		});
 		
 		for(JButton b: tools) {
@@ -921,7 +960,6 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 
 
 		}
-		
 		else if(tool == SelectedTool.SELECT && curveSelected >= 0) {
 			if(cmdEditor != null)
 				cmdEditor.dispose();
@@ -1001,16 +1039,36 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 			turnSpeeds.set(tempIndex, val);
 
 		}
+		else if(tool == SelectedTool.TRANSLATE) {
+
+			if(path.getBounds().contains((p.getMousePosition()))) {
+
+				if(!dragging){
+					refPoint = p.getMousePosition();
+					System.out.println(refPoint);
+				}
+				
+				dragging = true;
+
+			}
+		}
 	}
 	
 	public void mouseClicked(MouseEvent e) {
 		
 	}
 	public void mouseReleased(MouseEvent e) {
-		if(tool == SelectedTool.EDIT) {
-			dragging = false;
-			
+		if(tool == SelectedTool.TRANSLATE && dragging) {
+			AffineTransform t = new AffineTransform();
+			Point mouse = p.getMousePosition();
+			if(mouse != null)
+				t.translate(mouse.x - refPoint.x, mouse.y - refPoint.y);
+			path.transform(t);
+			p.repaint();
+			System.out.print(refPoint + " " + mouse);
 		}
+		dragging = false;
+		
 	}
 	public void mouseEntered(MouseEvent e) {
 		prompt.setFocusable(false);

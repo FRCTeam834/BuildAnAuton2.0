@@ -149,7 +149,7 @@ public class Export {
 	/**
 	 * Sends the program to the robot to be used
 	 */
-	public  void export() {
+	public  void export(String teamNumber) {
 		convertToCommands(realPath, realCommands, initialAngle, realBackwards);
 		String fName = JOptionPane.showInputDialog("Enter filename (no extension)") + ".autr";
 		File file = new File(fName);
@@ -175,10 +175,6 @@ public class Export {
 			byte[] buffer = new byte[(int)file.length()];
 			inputStream.read(buffer);
 
-			String teamNumber = JOptionPane.showInputDialog(null,"Enter Team Number");
-			if(teamNumber == null) {
-				throw new Exception();
-			}
 			
 			URL url = new URL("ftp://anonymous@roborio-" + teamNumber
 					+ "-frc.local/home/lvuser/" + fName);
@@ -195,7 +191,7 @@ public class Export {
 			
 		} 
 		catch (Exception e) {
-			JOptionPane.showMessageDialog(null, "Failed to Export");
+			JOptionPane.showMessageDialog(null, "Failed to Export, check team number and connection to robot");
 
 			e.printStackTrace();
 			file.delete();
