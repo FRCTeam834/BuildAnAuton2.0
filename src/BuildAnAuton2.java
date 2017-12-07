@@ -78,7 +78,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 	//Array of tools, allows program to disable/enable all
 	JButton[] tools = {add, add2, edit, select, delete, restart, speed, turnSpeed, translate};
 		
-	//Allows user to type commands into field, liek CAD program (not yet implemented)
+	//Allows user to type commands into field, like CAD program (not yet implemented)
 	JTextField prompt = new JTextField();
 	
 	//Dialog for choosing save/load location
