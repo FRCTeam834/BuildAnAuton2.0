@@ -59,7 +59,7 @@ import java.net.URL;
  * @author Daniel Qian
  * @author Ben Zalatan
  */
-public class BuildAnAuton2 extends JFrame implements MouseListener {
+public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener {
 		
 	//Tools that allow you to manipulate the path/actions
 	JToolBar toolbar = new JToolBar(); 
@@ -148,6 +148,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 	public double zoom = 1; //Zoom scale, adjusted using - and +/= keys
 	
 	int selectedLineIndex = -1; //Which line is selected and
+	
+	private boolean controlPressed = false; //Used to check when control is pressed in key listener
 	
 	//Main panel, contains the 
 	JComponent p = new JComponent() {
@@ -434,6 +436,8 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 	
 	public BuildAnAuton2() {
 		
+		addKeyListener(this);
+		
 		try {
 
 		URL ImageURL = BuildAnAuton2.class.getResource("field2017.png");
@@ -477,9 +481,9 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		toolbar.add(delete);
 		toolbar.add(speed);
 		toolbar.add(turnSpeed);
-		toolbar.add(restart);
 		toolbar.add(mirror);
 		toolbar.add(translate);
+		toolbar.add(restart);
 				
 		file.add(save);
 		file.add(load);
@@ -1117,6 +1121,54 @@ public class BuildAnAuton2 extends JFrame implements MouseListener {
 		x /= zoom;
 		y /= zoom;
 		return new Point(x, y);
+	}
+	
+		@Override
+	public void keyTyped(KeyEvent e) {
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
 		
+		int key = e.getKeyCode();
+		
+		//Checks if button pressed is number (0x30 is hex decimal representation of keyboard key 0)
+		if (key >= 0x30 && key <= 0x39) {
+			try {
+				
+				//Checks if key pressed is 0
+				if (key == KeyEvent.VK_0)
+					key = 58;
+				
+				//Converts hex into keyboard key number value plus 1 and clicks toolbar button at the index
+				((JButton) toolbar.getComponent(key-49)).doClick();
+				
+			} catch (ArrayIndexOutOfBoundsException ex) {}
+		}
+		
+		if (key == KeyEvent.VK_CONTROL || key == KeyEvent.VK_META) {
+			controlPressed = true; //Shows control key is currently pressed
+		}
+		
+		//Control s check
+		if (key == KeyEvent.VK_S && controlPressed)
+			save.doClick();
+		
+		//Control o check
+		if (key == KeyEvent.VK_O && controlPressed)
+			load.doClick();
+		
+		//Control e check
+		if (key == KeyEvent.VK_E && controlPressed)
+			export.doClick();
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		int key = e.getKeyCode();
+		
+		if (key == KeyEvent.VK_CONTROL || key == KeyEvent.VK_META) {
+			controlPressed = false; //Shows control key is released
+		}
 	}
 }
