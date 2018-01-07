@@ -440,14 +440,14 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener 
 		
 		try {
 
-		URL ImageURL = BuildAnAuton2.class.getResource("field2017.png");
+		URL ImageURL = BuildAnAuton2.class.getResource("field2018.png");
 		if(ImageURL != null) {
 				field = ImageIO.read(ImageURL);
 			
 
 		}
 		else{
-			field = ImageIO.read(new File("field2017.png"));
+			field = ImageIO.read(new File("field2018.png"));
 
 		}
 
@@ -465,7 +465,7 @@ public class BuildAnAuton2 extends JFrame implements MouseListener, KeyListener 
 		keys.put(KeyEvent.VK_B, false);
 		keys.put(KeyEvent.VK_SHIFT, false);
 		
-		inchPerPixel = 185.3/262.0; //650.22/field.getWidth() <- 2016 Field; 
+		inchPerPixel = 708d/field.getWidth(); //650.22/field.getWidth() <- 2016 Field; 
 		
 		scrollPane.setViewportView(p);
 		scrollPane.setPreferredSize(new Dimension(field.getWidth()+4, field.getHeight()+4));
